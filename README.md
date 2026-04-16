@@ -1,5 +1,3 @@
-# queryd
-
 <p align="left">
   <img src="./docs/assets/queryd-wordmark-dark.svg" alt="queryd" width="240" height="62" />
 </p>
