@@ -20,7 +20,7 @@
   </defs>
   <text x="0" y="38" class="logotype">quer</text>
   <text x="80" y="38" class="logotype">y</text>
-  <g transform="translate(74, 7) scale(1.06)" aria-hidden="true">
+  <g transform="translate(72, 20) scale(1.06)" aria-hidden="true">
     <path class="pulse" d="M0 5h3.2l1.8-3.2 2.4 6.4 2-3.2H20" />
   </g>
   <text x="98" y="38" class="logotype">d</text>
