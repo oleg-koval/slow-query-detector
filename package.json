@@ -1,0 +1,62 @@
+{
+  "name": "queryd",
+  "version": "0.1.0",
+  "description": "Database query latency detector for Node.js (Prisma-friendly)",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oleg-koval/slow-query-detector.git"
+  },
+  "bugs": {
+    "url": "https://github.com/oleg-koval/slow-query-detector/issues"
+  },
+  "homepage": "https://github.com/oleg-koval/slow-query-detector#readme",
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{ts,js,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md,yml,yaml}\"",
+    "typecheck": "tsc --noEmit",
+    "test:coverage": "vitest run --coverage",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "queryd",
+    "database",
+    "prisma",
+    "slow-query",
+    "observability",
+    "performance",
+    "latency"
+  ],
+  "author": "Oleg Koval",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^25.6.0",
+    "@vitest/coverage-v8": "^4.1.4",
+    "eslint": "^10.2.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.58.2",
+    "vitest": "^4.1.4"
+  },
+  "type": "module",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts"
+}
