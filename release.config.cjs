@@ -29,6 +29,11 @@ module.exports = {
     "main",
     { name: "beta", channel: "beta", prerelease: "beta" },
   ],
-  extends: "semantic-release-npm-github-publish",
+  plugins: [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/npm",
+    "@semantic-release/github",
+  ],
   ...(repositoryUrl ? { repositoryUrl } : {}),
 };
