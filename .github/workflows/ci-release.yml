@@ -11,6 +11,7 @@ permissions:
   issues: write
   pull-requests: write
   checks: write
+  id-token: write
 
 jobs:
   # Separate jobs so each name appears as a GitHub status check (branch protection).
@@ -70,7 +71,6 @@ jobs:
       - run: npm run release:dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   release:
     needs: [lint, format, test, release-readiness]
@@ -84,10 +84,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          registry-url: https://registry.npmjs.org
       - run: npm ci
       - run: npm run build
       - run: npm run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
