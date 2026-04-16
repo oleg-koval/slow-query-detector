@@ -1,7 +1,7 @@
 # queryd
 
 <p align="left">
-  <img src="./docs/assets/queryd-wordmark.png" alt="queryd" width="280" />
+  <img src="./docs/assets/queryd-wordmark-dark.svg" alt="queryd" width="240" height="62" />
 </p>
 
 [![CI](https://img.shields.io/github/actions/workflow/status/oleg-koval/slow-query-detector/ci-release.yml?branch=main&logo=github&label=ci)](https://github.com/oleg-koval/slow-query-detector/actions/workflows/ci-release.yml?query=branch%3Amain)

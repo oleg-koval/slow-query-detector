@@ -162,36 +162,23 @@
         flex-wrap: wrap;
       }
 
-      .wordmark {
-        font-family: var(--font-display);
-        font-weight: 700;
-        font-size: 1.35rem;
-        letter-spacing: -0.045em;
-        color: var(--fg);
+      .brand-link {
         display: inline-flex;
-        align-items: baseline;
-        line-height: 1;
+        align-items: center;
+        line-height: 0;
       }
 
-      .wordmark--hero {
-        font-size: clamp(2.75rem, 7.5vw, 4.5rem);
+      .brand-mark {
+        height: 1.75rem;
+        width: auto;
+        display: block;
+      }
+
+      .hero-mark {
+        width: min(22rem, 100%);
+        height: auto;
+        display: block;
         margin: 0 0 var(--space-5);
-      }
-
-      .wm-y {
-        position: relative;
-        display: inline-block;
-      }
-
-      .wm-pulse {
-        position: absolute;
-        left: 52%;
-        top: 48%;
-        width: 0.95em;
-        height: 0.48em;
-        transform: translate(-50%, -50%);
-        color: var(--accent);
-        pointer-events: none;
       }
 
       .nav-links {
@@ -485,18 +472,15 @@
     <a class="skip" href="#main">Skip to content</a>
     <header>
       <div class="wrap nav">
-        <a class="wordmark" href="./" aria-label="queryd — home">
-          quer<span class="wm-y"
-            >y<svg class="wm-pulse" viewBox="0 0 20 10" aria-hidden="true" focusable="false">
-              <path
-                d="M0 5h3.2l1.8-3.2 2.4 6.4 2-3.2H20"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.35"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              /></svg></span
-          >d
+        <a class="brand-link" href="./" aria-label="queryd — home">
+          <img
+            class="brand-mark"
+            src="./assets/queryd-wordmark.svg"
+            alt=""
+            width="200"
+            height="52"
+            decoding="async"
+          />
         </a>
         <nav class="nav-links" aria-label="Primary">
           <a class="pill" href="https://github.com/oleg-koval/slow-query-detector">Repository</a>
@@ -513,19 +497,15 @@
             <span class="pulse-dot" aria-hidden="true"></span>
             Early-stage OSS · pin a version in <code>0.x</code>
           </div>
-          <div class="wordmark wordmark--hero reveal" aria-hidden="true">
-            quer<span class="wm-y"
-              >y<svg class="wm-pulse" viewBox="0 0 20 10" aria-hidden="true" focusable="false">
-                <path
-                  d="M0 5h3.2l1.8-3.2 2.4 6.4 2-3.2H20"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.35"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                /></svg></span
-            >d
-          </div>
+          <img
+            class="hero-mark reveal"
+            src="./assets/queryd-wordmark.svg"
+            alt=""
+            width="200"
+            height="52"
+            decoding="async"
+            aria-hidden="true"
+          />
           <h1 class="reveal">Latency budgets for the SQL your Node app actually runs.</h1>
           <p class="lede reveal">
             <strong>queryd</strong> is a database query latency detector for Node.js with first-class Prisma support

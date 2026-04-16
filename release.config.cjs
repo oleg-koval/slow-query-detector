@@ -30,7 +30,14 @@ module.exports = {
     { name: "beta", channel: "beta", prerelease: "beta" },
   ],
   plugins: [
-    "@semantic-release/commit-analyzer",
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        preset: "angular",
+        // Custom rules run first; unmatched commits still use the plugin defaults (feat/fix/perf, etc.).
+        releaseRules: [{ type: "docs", release: "patch" }],
+      },
+    ],
     "@semantic-release/release-notes-generator",
     [
       "@semantic-release/npm",
