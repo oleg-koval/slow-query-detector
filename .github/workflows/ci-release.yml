@@ -68,10 +68,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - run: npm config set authProvider npm:github
+      - run: echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > ~/.npmrc
       - run: npm run release:dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release:
     needs: [lint, format, test, release-readiness]
@@ -87,7 +88,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - run: npm config set authProvider npm:github
+      - run: echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > ~/.npmrc
       - run: npm run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
