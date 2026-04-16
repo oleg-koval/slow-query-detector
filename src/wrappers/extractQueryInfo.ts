@@ -1,11 +1,8 @@
 /**
- * Extract SQL and params from Prisma template literal query
- */
-
-/**
- * Extract SQL and params from Prisma query
- * Prisma uses template literals: $queryRaw`SELECT * FROM users WHERE id = ${id}`
- * This converts to: $queryRaw(['SELECT * FROM users WHERE id = ', ''], id)
+ * Extract SQL and params from a tagged-template call (Prisma, postgres.js, etc.)
+ *
+ * Example: `` fn`SELECT * FROM users WHERE id = ${id}` `` becomes PostgreSQL-style
+ * placeholders `$1`, `$2`, … plus a parallel params array.
  */
 export function extractQueryInfo(
   sql: TemplateStringsArray,

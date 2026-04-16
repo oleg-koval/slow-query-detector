@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { PrismaClient } from "@prisma/client";
-import { createSlowQueryDetector, wrapPrismaClient } from "../index";
+import { createSlowQueryDetector } from "../index";
+import { wrapPrismaClient } from "../prisma";
 
 describe("wrapPrismaClient explain wiring", () => {
   it("creates explain runner when enableExplain is true", () => {
