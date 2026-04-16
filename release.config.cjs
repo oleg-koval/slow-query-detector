@@ -36,6 +36,8 @@ module.exports = {
       "@semantic-release/npm",
       {
         skipAuth: true,
+        // false until first publish + npm Trusted Publisher; then true + OIDC-only workflow.
+        provenance: false,
       },
     ],
     "@semantic-release/github",
