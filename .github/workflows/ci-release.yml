@@ -78,6 +78,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SEMANTIC_RELEASE_GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_GH_TOKEN }}
+          # @semantic-release/npm verifyConditions requires NPM_TOKEN (same as release job).
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           if [ -n "${SEMANTIC_RELEASE_GH_TOKEN}" ]; then
             export GH_TOKEN="${SEMANTIC_RELEASE_GH_TOKEN}"
