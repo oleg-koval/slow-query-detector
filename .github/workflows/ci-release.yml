@@ -78,15 +78,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SEMANTIC_RELEASE_GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_GH_TOKEN }}
-          # @semantic-release/npm verifyConditions requires NPM_TOKEN (same as release job).
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # Env name must be NPM_TOKEN for @semantic-release/npm; value from repo secret NPM_SECRET.
+          NPM_TOKEN: ${{ secrets.NPM_SECRET }}
         run: |
           if [ -n "${SEMANTIC_RELEASE_GH_TOKEN}" ]; then
             export GH_TOKEN="${SEMANTIC_RELEASE_GH_TOKEN}"
           fi
           npm run release:dry-run
 
-  # Until Trusted Publisher: NPM_TOKEN + always-auth + registry-url (see gist). Then OIDC-only.
+  # Until Trusted Publisher: npm token secret + always-auth + registry-url (see gist). Then OIDC-only.
   release:
     needs: [lint, format, test, release-readiness]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta')
@@ -108,13 +108,14 @@ jobs:
           always-auth: true
           registry-url: https://registry.npmjs.org
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_SECRET }}
       - run: npm ci
       - run: npm run build
       - name: Semantic release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_SECRET }}
+          NPM_TOKEN: ${{ secrets.NPM_SECRET }}
           SEMANTIC_RELEASE_GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_GH_TOKEN }}
         run: |
           if [ -n "${SEMANTIC_RELEASE_GH_TOKEN}" ]; then
