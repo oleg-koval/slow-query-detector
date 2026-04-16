@@ -3,7 +3,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createSlowQueryDetector, wrapPrismaClient } from "../index";
+import { createSlowQueryDetector } from "../index";
+import { wrapPrismaClient } from "../prisma";
 import type { ILogger, IContextProvider } from "../types";
 import type { PrismaClient } from "@prisma/client";
 

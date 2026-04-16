@@ -73,9 +73,8 @@ describe("wrapQueryFn edge cases", () => {
     expect(result).toEqual([{ sql: "SELECT 1" }]);
   });
 
-  it("should document that Prisma queries should use wrapPrisma", () => {
-    // This test documents that wrapQueryFn is not for Prisma template literals
-    // Prisma queries should use wrapPrisma() instead
+  it("should document that tagged-template SQL should use wrapTaggedTemplate or @olegkoval/queryd/prisma", () => {
+    // wrapQueryFn is not for tagged templates; use wrapTaggedTemplate or @olegkoval/queryd/prisma
     expect(true).toBe(true);
   });
 });

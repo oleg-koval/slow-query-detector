@@ -1,12 +1,16 @@
 {
   "name": "@olegkoval/queryd",
   "version": "0.1.0",
-  "description": "Database query latency detector for Node.js (Prisma-friendly)",
+  "description": "Database query latency detector for Node.js (driver-agnostic core, optional Prisma)",
   "main": "./dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./prisma": {
+      "types": "./dist/prisma.d.ts",
+      "import": "./dist/prisma.js"
     }
   },
   "files": [
@@ -53,6 +57,11 @@
   "license": "MIT",
   "peerDependencies": {
     "@prisma/client": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@prisma/client": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

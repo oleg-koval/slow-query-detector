@@ -1,14 +1,13 @@
 /**
- * Public API for queryd (slow query detector)
+ * Public API for queryd (slow query detector) — ORM/driver agnostic core.
+ * Prisma helpers live in `@olegkoval/queryd/prisma`.
  */
 
-import type { PrismaClient } from "@prisma/client";
 import type { SlowQueryDetectorConfig, ILogger, IContextProvider, IEventSink } from "./types";
 import { SlowQueryDetector } from "./detector";
 import { LoggerSink } from "./sinks/loggerSink";
-import { createExplainRunner } from "./explain/explainRunner";
-import { wrapPrisma } from "./wrappers/wrapPrisma";
 import { wrapQueryFn } from "./wrappers/wrapQueryFn";
+import { wrapTaggedTemplate } from "./wrappers/wrapTaggedTemplate";
 
 /**
  * Create a slow query detector instance
@@ -36,21 +35,8 @@ export function createSlowQueryDetector(
   return new SlowQueryDetector(config, deps.contextProvider, sinks);
 }
 
-/**
- * Wrap Prisma client with slow query detection
- */
-export function wrapPrismaClient<T extends PrismaClient>(
-  prisma: T,
-  detector: SlowQueryDetector,
-): T {
-  if (detector.config.enableExplain && !detector.explainRunner) {
-    detector.explainRunner = createExplainRunner(prisma);
-  }
-
-  return wrapPrisma(prisma, detector);
-}
-
-export { wrapPrisma, wrapQueryFn };
+export { wrapQueryFn, wrapTaggedTemplate };
+export { extractQueryInfo } from "./wrappers/extractQueryInfo";
 export type { SlowQueryDetector } from "./detector";
 export type {
   ILogger,
@@ -65,4 +51,3 @@ export type {
 export { getDbContext, runWithDbContext, type DbContext } from "./context";
 export { createNoopLogger, createConsoleLogger } from "./logger";
 export { DEFAULT_CONFIG } from "./config";
-export { createExplainRunner } from "./explain/explainRunner";
