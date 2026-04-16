@@ -13,7 +13,10 @@ export { wrapPrisma, createExplainRunner };
 /**
  * Wrap Prisma client with slow query detection and optional EXPLAIN wiring.
  */
-export function wrapPrismaClient<T extends PrismaClient>(prisma: T, detector: SlowQueryDetector): T {
+export function wrapPrismaClient<T extends PrismaClient>(
+  prisma: T,
+  detector: SlowQueryDetector,
+): T {
   if (detector.config.enableExplain && !detector.explainRunner) {
     detector.explainRunner = createExplainRunner(prisma);
   }
