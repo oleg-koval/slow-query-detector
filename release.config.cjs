@@ -35,8 +35,7 @@ module.exports = {
     [
       "@semantic-release/npm",
       {
-        skipAuth: true,
-        // false until first publish + npm Trusted Publisher; then true + OIDC-only workflow.
+        // true after npm Trusted Publisher (OIDC); token-based publish uses NPM_TOKEN in CI.
         provenance: false,
       },
     ],
