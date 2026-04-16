@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="canonical" href="https://oleg-koval.github.io/slow-query-detector/" />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#0c0c0e" />
     <title>queryd — slow query detection for Node.js</title>
@@ -23,9 +24,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Source+Code+Pro:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "queryd",
+        "description": "Database query latency detector for Node.js with Prisma-friendly integration.",
+        "license": "https://opensource.org/licenses/MIT",
+        "codeRepository": "https://github.com/oleg-koval/slow-query-detector",
+        "programmingLanguage": ["TypeScript", "JavaScript"],
+        "runtimePlatform": "Node.js",
+        "url": "https://oleg-koval.github.io/slow-query-detector/"
+      }
+    </script>
     <style>
       :root {
         --bg0: #070708;
@@ -37,8 +51,9 @@
         --cyan-dim: rgba(94, 234, 212, 0.14);
         --shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
         --radius: 16px;
-        --font: "DM Sans", system-ui, -apple-system, Segoe UI, sans-serif;
-        --mono: "JetBrains Mono", ui-monospace, monospace;
+        --font: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+        --display: "Bricolage Grotesque", var(--font);
+        --mono: "Source Code Pro", ui-monospace, monospace;
       }
 
       *,
@@ -100,10 +115,27 @@
         gap: 16px;
       }
 
+      .skip {
+        position: absolute;
+        left: -9999px;
+        top: 0.75rem;
+        z-index: 100;
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        background: var(--fg);
+        color: var(--bg0);
+        font-weight: 600;
+      }
+
+      .skip:focus {
+        left: 0.75rem;
+      }
+
       .brand {
         display: flex;
         align-items: center;
         gap: 12px;
+        font-family: var(--display);
         font-weight: 600;
         letter-spacing: 0.02em;
       }
@@ -181,6 +213,7 @@
       }
 
       h1 {
+        font-family: var(--display);
         font-size: clamp(2rem, 4vw, 2.75rem);
         line-height: 1.12;
         margin: 0 0 14px;
@@ -230,6 +263,7 @@
 
       .card h3 {
         margin: 0 0 10px;
+        font-family: var(--display);
         font-size: 1.05rem;
         letter-spacing: -0.02em;
       }
@@ -299,6 +333,7 @@
     </style>
   </head>
   <body>
+    <a class="skip" href="#main">Skip to content</a>
     <header>
       <div class="wrap nav">
         <a class="brand" href="./">
@@ -312,7 +347,7 @@
       </div>
     </header>
 
-    <main>
+    <main id="main">
       <section class="hero wrap">
         <div class="hero-badge reveal">
           <span class="pulse-dot" aria-hidden="true"></span>
@@ -328,9 +363,9 @@
         />
         <h1 class="reveal">Latency budgets for the SQL your Node app actually runs.</h1>
         <p class="lede reveal">
-          <strong style="color: var(--fg)">queryd</strong> is a database query latency detector for Node.js. Prisma-friendly
-          integration, sampling, and an optional <code>EXPLAIN</code> pipeline are landing as the core migrates from
-          production code into this package.
+          <strong style="color: var(--fg)">queryd</strong> is a database query latency detector for Node.js with
+          first-class Prisma support (<code>$queryRaw</code>, <code>$executeRaw</code>, interactive
+          <code>$transaction</code>), sampling, optional <code>EXPLAIN ANALYZE</code>, and pluggable sinks.
         </p>
         <div class="cta-row reveal">
           <a class="pill primary" href="https://www.npmjs.com/package/@olegkoval/queryd">Install from npm</a>
@@ -357,10 +392,25 @@
         </div>
 
         <div class="code-panel reveal">
-          <div class="label">Today (placeholder API)</div>
-          <pre><code>import { getVersion } from "@olegkoval/queryd";
+          <div class="label">Usage (Prisma)</div>
+          <pre><code>import { PrismaClient } from "@prisma/client";
+import {
+  createSlowQueryDetector,
+  wrapPrismaClient,
+  createConsoleLogger,
+  runWithDbContext,
+} from "@olegkoval/queryd";
 
-console.log(getVersion());</code></pre>
+const base = new PrismaClient();
+const detector = createSlowQueryDetector(
+  { warnThresholdMs: 200, dbName: "primary" },
+  { logger: createConsoleLogger() },
+);
+export const prisma = wrapPrismaClient(base, detector);
+
+await runWithDbContext({ requestId: "req-1", userId: "u-1" }, async () => {
+  await prisma.$queryRaw`SELECT 1`;
+});</code></pre>
         </div>
       </section>
 

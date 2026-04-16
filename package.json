@@ -27,7 +27,7 @@
   "bugs": {
     "url": "https://github.com/oleg-koval/slow-query-detector/issues"
   },
-  "homepage": "https://github.com/oleg-koval/slow-query-detector#readme",
+  "homepage": "https://oleg-koval.github.io/slow-query-detector/",
   "scripts": {
     "test": "vitest run",
     "build": "tsc -p tsconfig.build.json",

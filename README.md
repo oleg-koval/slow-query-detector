@@ -1,11 +1,20 @@
 # queryd
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Node](https://img.shields.io/node/v/@olegkoval%2Fqueryd.svg)](https://nodejs.org/)
+<p align="center">
+  <img src="./docs/assets/queryd-wordmark.png" alt="queryd" width="520" />
+</p>
 
-<!-- npm: [![npm](https://img.shields.io/npm/v/@olegkoval%2Fqueryd.svg)](https://www.npmjs.com/package/@olegkoval/queryd) -->
+[![CI](https://img.shields.io/github/actions/workflow/status/oleg-koval/slow-query-detector/ci-release.yml?branch=main&logo=github&label=ci)](https://github.com/oleg-koval/slow-query-detector/actions/workflows/ci-release.yml?query=branch%3Amain)
+[![Coverage](https://img.shields.io/coverallsCoverage/github/oleg-koval/slow-query-detector?branch=main&logo=coveralls)](https://coveralls.io/github/oleg-koval/slow-query-detector)
+[![npm version](https://img.shields.io/npm/v/@olegkoval%2Fqueryd.svg?logo=npm&label=npm)](https://www.npmjs.com/package/@olegkoval/queryd)
+[![npm downloads](https://img.shields.io/npm/dm/@olegkoval%2Fqueryd.svg?logo=npm&label=downloads)](https://www.npmjs.com/package/@olegkoval/queryd)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Node](https://img.shields.io/node/v/@olegkoval%2Fqueryd.svg?logo=node.js&label=node)](https://nodejs.org/)
+[![GitHub Pages](https://img.shields.io/badge/docs-GitHub%20Pages-5eead4)](https://oleg-koval.github.io/slow-query-detector/)
 
 **queryd** is a database query latency detector for Node.js, with first-class **Prisma** support (`$queryRaw`, `$executeRaw`, interactive `$transaction`), sampling, optional `EXPLAIN ANALYZE`, and pluggable sinks.
+
+Project site: [oleg-koval.github.io/slow-query-detector](https://oleg-koval.github.io/slow-query-detector/).
 
 ## Peer dependency
 
