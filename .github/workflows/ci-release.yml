@@ -68,6 +68,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - run: npm config set authProvider npm:github
       - run: npm run release:dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -86,6 +87,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - run: npm config set authProvider npm:github
       - run: npm run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
