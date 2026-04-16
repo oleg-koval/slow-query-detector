@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="canonical" href="https://oleg-koval.github.io/slow-query-detector/" />
     <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#0c0c0e" />
+    <meta name="theme-color" content="oklch(0.13 0.014 240)" />
     <title>queryd — slow query detection for Node.js</title>
     <meta
       name="description"
@@ -19,12 +19,19 @@
     <meta property="og:type" content="website" />
     <meta
       property="og:image"
-      content="https://oleg-koval.github.io/slow-query-detector/assets/logo.png"
+      content="https://oleg-koval.github.io/slow-query-detector/assets/og-card.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:image"
+      content="https://oleg-koval.github.io/slow-query-detector/assets/og-card.png"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Source+Code+Pro:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap"
       rel="stylesheet"
     />
     <script type="application/ld+json">
@@ -42,18 +49,29 @@
     </script>
     <style>
       :root {
-        --bg0: #070708;
-        --bg1: #0c0c0f;
-        --fg: #f4f4f5;
-        --muted: #a1a1aa;
-        --line: rgba(255, 255, 255, 0.08);
-        --cyan: #5eead4;
-        --cyan-dim: rgba(94, 234, 212, 0.14);
-        --shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
-        --radius: 16px;
-        --font: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
-        --display: "Bricolage Grotesque", var(--font);
-        --mono: "Source Code Pro", ui-monospace, monospace;
+        --hue: 238;
+        --accent-hue: 168;
+        --bg-deep: oklch(0.12 0.018 var(--hue));
+        --bg-raised: oklch(0.16 0.02 var(--hue));
+        --bg-code: oklch(0.1 0.015 var(--hue));
+        --fg: oklch(0.93 0.012 var(--hue));
+        --fg-soft: oklch(0.72 0.028 var(--hue));
+        --line: color-mix(in oklch, var(--fg) 12%, transparent);
+        --accent: oklch(0.72 0.11 var(--accent-hue));
+        --accent-soft: color-mix(in oklch, var(--accent) 22%, transparent);
+        --radius-sm: 10px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 24px;
+        --space-6: 32px;
+        --space-8: 48px;
+        --space-10: 64px;
+        --font-body: "Literata", "Georgia", serif;
+        --font-display: "Geologica", system-ui, sans-serif;
+        --font-mono: "JetBrains Mono", ui-monospace, monospace;
+        --shadow: 0 28px 90px oklch(0.05 0.02 var(--hue) / 0.55);
       }
 
       *,
@@ -80,12 +98,17 @@
       body {
         margin: 0;
         min-height: 100vh;
-        font-family: var(--font);
+        font-family: var(--font-body);
+        font-size: 1.05rem;
+        line-height: 1.62;
         color: var(--fg);
-        background: radial-gradient(1200px 800px at 12% -10%, rgba(94, 234, 212, 0.08), transparent 55%),
-          radial-gradient(900px 600px at 88% 0%, rgba(56, 189, 248, 0.06), transparent 50%),
-          linear-gradient(180deg, var(--bg0), var(--bg1) 32%, var(--bg0));
-        line-height: 1.55;
+        background: var(--bg-deep);
+        background-image: radial-gradient(
+            ellipse 100% 80% at 0% -20%,
+            oklch(0.22 0.04 var(--accent-hue) / 0.12),
+            transparent 55%
+          ),
+          radial-gradient(ellipse 70% 50% at 100% 0%, oklch(0.2 0.035 var(--hue) / 0.2), transparent 45%);
       }
 
       a {
@@ -93,26 +116,15 @@
         text-decoration: none;
       }
 
+      a:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+      }
+
       .wrap {
-        width: min(1080px, calc(100% - 40px));
+        width: min(72rem, calc(100% - var(--space-6)));
         margin-inline: auto;
-      }
-
-      header {
-        padding: 28px 0 8px;
-        border-bottom: 1px solid var(--line);
-        backdrop-filter: blur(10px);
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        background: linear-gradient(180deg, rgba(7, 7, 8, 0.92), rgba(7, 7, 8, 0.65), transparent);
-      }
-
-      .nav {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
       }
 
       .skip {
@@ -123,7 +135,8 @@
         padding: 0.5rem 1rem;
         border-radius: 999px;
         background: var(--fg);
-        color: var(--bg0);
+        color: var(--bg-deep);
+        font-family: var(--font-display);
         font-weight: 600;
       }
 
@@ -131,25 +144,60 @@
         left: 0.75rem;
       }
 
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-family: var(--display);
-        font-weight: 600;
-        letter-spacing: 0.02em;
+      header {
+        padding: var(--space-5) 0 var(--space-4);
+        border-bottom: 1px solid var(--line);
+        background: color-mix(in oklch, var(--bg-deep) 88%, transparent);
+        backdrop-filter: blur(12px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
       }
 
-      .brand img {
-        height: 36px;
-        width: auto;
-        display: block;
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+        flex-wrap: wrap;
+      }
+
+      .wordmark {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.35rem;
+        letter-spacing: -0.045em;
+        color: var(--fg);
+        display: inline-flex;
+        align-items: baseline;
+        line-height: 1;
+      }
+
+      .wordmark--hero {
+        font-size: clamp(2.75rem, 7.5vw, 4.5rem);
+        margin: 0 0 var(--space-5);
+      }
+
+      .wm-y {
+        position: relative;
+        display: inline-block;
+      }
+
+      .wm-pulse {
+        position: absolute;
+        left: 52%;
+        top: 48%;
+        width: 0.95em;
+        height: 0.48em;
+        transform: translate(-50%, -50%);
+        color: var(--accent);
+        pointer-events: none;
       }
 
       .nav-links {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: var(--space-3);
         align-items: center;
         justify-content: flex-end;
       }
@@ -158,170 +206,271 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 8px 14px;
+        padding: 10px 16px;
         border-radius: 999px;
         border: 1px solid var(--line);
-        font-size: 0.9rem;
+        font-family: var(--font-display);
+        font-size: 0.88rem;
         font-weight: 500;
+        letter-spacing: 0.01em;
         color: var(--fg);
-        background: rgba(255, 255, 255, 0.03);
-        transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+        background: oklch(0.18 0.018 var(--hue) / 0.65);
+        transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
       }
 
       .pill:hover {
-        border-color: rgba(94, 234, 212, 0.45);
-        background: rgba(94, 234, 212, 0.06);
-        transform: translateY(-1px);
+        border-color: color-mix(in oklch, var(--accent) 55%, var(--line));
+        background: oklch(0.2 0.022 var(--hue) / 0.85);
       }
 
       .pill.primary {
-        border-color: rgba(94, 234, 212, 0.55);
-        background: linear-gradient(135deg, rgba(94, 234, 212, 0.18), rgba(56, 189, 248, 0.08));
+        border-color: color-mix(in oklch, var(--accent) 45%, var(--line));
+        background: var(--accent-soft);
+        color: var(--fg);
+      }
+
+      .pill.primary:hover {
+        background: color-mix(in oklch, var(--accent) 28%, var(--bg-raised));
+      }
+
+      main {
+        padding-bottom: var(--space-10);
       }
 
       .hero {
-        padding: 72px 0 56px;
-        text-align: center;
+        padding: var(--space-8) 0 var(--space-6);
+        text-align: start;
+      }
+
+      .hero-inner {
+        max-width: 52rem;
       }
 
       .hero-badge {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 6px 12px;
+        gap: 10px;
+        padding: 8px 14px;
         border-radius: 999px;
         border: 1px solid var(--line);
-        color: var(--muted);
-        font-size: 0.82rem;
-        margin-bottom: 22px;
-        background: rgba(255, 255, 255, 0.02);
+        color: var(--fg-soft);
+        font-family: var(--font-display);
+        font-size: 0.8rem;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        margin-bottom: var(--space-5);
+        background: oklch(0.17 0.02 var(--hue) / 0.55);
       }
 
       .pulse-dot {
-        width: 8px;
-        height: 8px;
+        width: 7px;
+        height: 7px;
         border-radius: 50%;
-        background: var(--cyan);
-        box-shadow: 0 0 0 6px var(--cyan-dim);
-      }
-
-      .hero-logo {
-        width: min(520px, 92vw);
-        height: auto;
-        margin: 0 auto 28px;
-        filter: drop-shadow(0 28px 48px rgba(0, 0, 0, 0.45));
+        background: var(--accent);
+        box-shadow: 0 0 0 5px var(--accent-soft);
+        flex-shrink: 0;
       }
 
       h1 {
-        font-family: var(--display);
-        font-size: clamp(2rem, 4vw, 2.75rem);
-        line-height: 1.12;
-        margin: 0 0 14px;
-        letter-spacing: -0.03em;
+        font-family: var(--font-display);
+        font-size: clamp(2.05rem, 3.6vw, 2.85rem);
+        font-weight: 600;
+        line-height: 1.14;
+        letter-spacing: -0.035em;
+        margin: 0 0 var(--space-4);
+        max-width: 22ch;
       }
 
       .lede {
-        margin: 0 auto 32px;
-        max-width: 640px;
-        color: var(--muted);
-        font-size: 1.1rem;
+        margin: 0 0 var(--space-5);
+        max-width: 38rem;
+        color: var(--fg-soft);
+        font-size: 1.12rem;
+      }
+
+      .lede strong {
+        color: var(--fg);
+        font-weight: 600;
       }
 
       .cta-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
-        justify-content: center;
-        margin-bottom: 56px;
+        gap: var(--space-3);
+        margin-bottom: var(--space-8);
       }
 
       .grid {
         display: grid;
-        gap: 16px;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        margin-bottom: 56px;
+        gap: var(--space-4);
+        grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+        margin-bottom: var(--space-8);
       }
 
       .card {
         border: 1px solid var(--line);
-        border-radius: var(--radius);
-        padding: 22px 22px 20px;
-        background: linear-gradient(160deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+        border-radius: var(--radius-lg);
+        padding: var(--space-5) var(--space-5) var(--space-4);
+        background: linear-gradient(
+          155deg,
+          oklch(0.2 0.022 var(--hue) / 0.55),
+          oklch(0.14 0.016 var(--hue) / 0.35)
+        );
         box-shadow: var(--shadow);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .card::before {
-        content: "";
-        position: absolute;
-        inset: -40% -20% auto;
-        height: 120px;
-        background: radial-gradient(closest-side, rgba(94, 234, 212, 0.12), transparent 70%);
-        pointer-events: none;
       }
 
       .card h3 {
-        margin: 0 0 10px;
-        font-family: var(--display);
-        font-size: 1.05rem;
+        margin: 0 0 var(--space-3);
+        font-family: var(--font-display);
+        font-size: 1.08rem;
+        font-weight: 600;
         letter-spacing: -0.02em;
       }
 
       .card p {
         margin: 0;
-        color: var(--muted);
-        font-size: 0.95rem;
+        color: var(--fg-soft);
+        font-size: 0.98rem;
+        line-height: 1.58;
       }
 
       .code-panel {
-        border-radius: var(--radius);
+        border-radius: var(--radius-lg);
         border: 1px solid var(--line);
-        background: rgba(0, 0, 0, 0.35);
-        padding: 20px 22px;
-        margin-bottom: 56px;
+        background: var(--bg-code);
         box-shadow: var(--shadow);
+        text-align: start;
+        overflow: hidden;
       }
 
-      .code-panel .label {
-        font-size: 0.75rem;
+      .code-panel__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+        flex-wrap: wrap;
+        padding: var(--space-3) var(--space-4);
+        border-bottom: 1px solid var(--line);
+        background: oklch(0.14 0.016 var(--hue) / 0.9);
+      }
+
+      .code-panel__label {
+        font-family: var(--font-display);
+        font-size: 0.72rem;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--muted);
-        margin-bottom: 12px;
+        letter-spacing: 0.14em;
+        color: var(--fg-soft);
       }
 
-      pre {
+      .code-panel__meta {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+      }
+
+      .lang-tag {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 500;
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        color: var(--fg-soft);
+      }
+
+      .copy-btn {
+        font-family: var(--font-display);
+        font-size: 0.82rem;
+        font-weight: 500;
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: oklch(0.18 0.02 var(--hue));
+        color: var(--fg-soft);
+        cursor: pointer;
+      }
+
+      .copy-btn:hover {
+        color: var(--fg);
+        border-color: color-mix(in oklch, var(--accent) 35%, var(--line));
+      }
+
+      .copy-btn[data-copied="true"] {
+        color: var(--accent);
+        border-color: color-mix(in oklch, var(--accent) 40%, var(--line));
+      }
+
+      .code-panel pre {
         margin: 0;
-        font-family: var(--mono);
-        font-size: 0.9rem;
-        line-height: 1.5;
-        color: #e4e4e7;
+        padding: var(--space-4) var(--space-5) var(--space-5);
+        font-family: var(--font-mono);
+        font-size: 0.84rem;
+        line-height: 1.65;
+        color: oklch(0.88 0.02 var(--hue));
         overflow-x: auto;
+        text-align: start;
+        direction: ltr;
+        unicode-bidi: isolate;
+        tab-size: 2;
+      }
+
+      .code-panel code {
+        font-family: inherit;
+      }
+
+      .tok-k {
+        color: oklch(0.78 0.08 var(--accent-hue));
+        font-weight: 500;
+      }
+      .tok-s {
+        color: oklch(0.78 0.06 95);
+      }
+      .tok-f {
+        color: oklch(0.82 0.05 280);
+      }
+      .tok-c {
+        color: oklch(0.55 0.02 var(--hue));
+        font-style: italic;
+      }
+      .tok-t {
+        color: oklch(0.7 0.04 var(--accent-hue));
       }
 
       .footnote {
         text-align: center;
-        color: var(--muted);
-        font-size: 0.9rem;
-        padding: 32px 0 48px;
+        color: var(--fg-soft);
+        font-size: 0.92rem;
+        padding: var(--space-6) 0 var(--space-5);
         border-top: 1px solid var(--line);
+        font-family: var(--font-display);
+      }
+
+      .footnote a {
+        text-decoration: underline;
+        text-underline-offset: 3px;
       }
 
       .reveal {
         opacity: 0;
-        transform: translateY(12px);
-        animation: rise 0.7s ease forwards;
+        transform: translateY(14px);
+        animation: rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       }
 
       .reveal:nth-child(2) {
-        animation-delay: 0.06s;
+        animation-delay: 0.07s;
       }
       .reveal:nth-child(3) {
         animation-delay: 0.12s;
       }
       .reveal:nth-child(4) {
-        animation-delay: 0.18s;
+        animation-delay: 0.17s;
+      }
+      .reveal:nth-child(5) {
+        animation-delay: 0.22s;
+      }
+      .reveal:nth-child(6) {
+        animation-delay: 0.27s;
       }
 
       @keyframes rise {
@@ -336,8 +485,18 @@
     <a class="skip" href="#main">Skip to content</a>
     <header>
       <div class="wrap nav">
-        <a class="brand" href="./">
-          <img src="./assets/logo.png" alt="queryd" width="180" height="48" />
+        <a class="wordmark" href="./" aria-label="queryd — home">
+          quer<span class="wm-y"
+            >y<svg class="wm-pulse" viewBox="0 0 20 10" aria-hidden="true" focusable="false">
+              <path
+                d="M0 5h3.2l1.8-3.2 2.4 6.4 2-3.2H20"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.35"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              /></svg></span
+          >d
         </a>
         <nav class="nav-links" aria-label="Primary">
           <a class="pill" href="https://github.com/oleg-koval/slow-query-detector">Repository</a>
@@ -349,68 +508,83 @@
 
     <main id="main">
       <section class="hero wrap">
-        <div class="hero-badge reveal">
-          <span class="pulse-dot" aria-hidden="true"></span>
-          Early-stage OSS · pin a version in <code>0.x</code>
-        </div>
-        <img
-          class="hero-logo reveal"
-          src="./assets/logo.png"
-          alt="queryd wordmark"
-          width="640"
-          height="180"
-          fetchpriority="high"
-        />
-        <h1 class="reveal">Latency budgets for the SQL your Node app actually runs.</h1>
-        <p class="lede reveal">
-          <strong style="color: var(--fg)">queryd</strong> is a database query latency detector for Node.js with
-          first-class Prisma support (<code>$queryRaw</code>, <code>$executeRaw</code>, interactive
-          <code>$transaction</code>), sampling, optional <code>EXPLAIN ANALYZE</code>, and pluggable sinks.
-        </p>
-        <div class="cta-row reveal">
-          <a class="pill primary" href="https://www.npmjs.com/package/@olegkoval/queryd">Install from npm</a>
-          <a class="pill" href="https://github.com/oleg-koval/slow-query-detector/blob/main/README.md">Read the README</a>
-        </div>
+        <div class="hero-inner">
+          <div class="hero-badge reveal">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            Early-stage OSS · pin a version in <code>0.x</code>
+          </div>
+          <div class="wordmark wordmark--hero reveal" aria-hidden="true">
+            quer<span class="wm-y"
+              >y<svg class="wm-pulse" viewBox="0 0 20 10" aria-hidden="true" focusable="false">
+                <path
+                  d="M0 5h3.2l1.8-3.2 2.4 6.4 2-3.2H20"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.35"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                /></svg></span
+            >d
+          </div>
+          <h1 class="reveal">Latency budgets for the SQL your Node app actually runs.</h1>
+          <p class="lede reveal">
+            <strong>queryd</strong> is a database query latency detector for Node.js with first-class Prisma support
+            (<code>$queryRaw</code>, <code>$executeRaw</code>, interactive <code>$transaction</code>), sampling,
+            optional <code>EXPLAIN ANALYZE</code>, and pluggable sinks.
+          </p>
+          <div class="cta-row reveal">
+            <a class="pill primary" href="https://www.npmjs.com/package/@olegkoval/queryd">Install from npm</a>
+            <a class="pill" href="https://github.com/oleg-koval/slow-query-detector/blob/main/README.md">Read the README</a>
+          </div>
 
-        <div class="grid">
-          <article class="card reveal">
-            <h3>Budgets, not vibes</h3>
-            <p>Flag database work that exceeds a latency threshold so regressions surface before users feel them.</p>
-          </article>
-          <article class="card reveal">
-            <h3>Prisma-shaped path</h3>
-            <p>Designed for common Node + ORM setups; the goal is ergonomic hooks instead of hand-rolled timers.</p>
-          </article>
-          <article class="card reveal">
-            <h3>Predictable overhead</h3>
-            <p>Sampling-first design so observability stays cheap enough to leave on in production.</p>
-          </article>
-          <article class="card reveal">
-            <h3>Explain the worst</h3>
-            <p>Optional EXPLAIN pipeline to inspect the slowest offenders when you need depth, not noise.</p>
-          </article>
-        </div>
+          <div class="grid">
+            <article class="card reveal">
+              <h3>Budgets, not vibes</h3>
+              <p>Flag database work that exceeds a latency threshold so regressions surface before users feel them.</p>
+            </article>
+            <article class="card reveal">
+              <h3>Prisma-shaped path</h3>
+              <p>Designed for common Node + ORM setups; the goal is ergonomic hooks instead of hand-rolled timers.</p>
+            </article>
+            <article class="card reveal">
+              <h3>Predictable overhead</h3>
+              <p>Sampling-first design so observability stays cheap enough to leave on in production.</p>
+            </article>
+            <article class="card reveal">
+              <h3>Explain the worst</h3>
+              <p>Optional EXPLAIN pipeline to inspect the slowest offenders when you need depth, not noise.</p>
+            </article>
+          </div>
 
-        <div class="code-panel reveal">
-          <div class="label">Usage (Prisma)</div>
-          <pre><code>import { PrismaClient } from "@prisma/client";
-import {
-  createSlowQueryDetector,
-  wrapPrismaClient,
-  createConsoleLogger,
-  runWithDbContext,
-} from "@olegkoval/queryd";
+          <div class="code-panel reveal">
+            <div class="code-panel__head">
+              <span class="code-panel__label">Usage · Prisma</span>
+              <div class="code-panel__meta">
+                <span class="lang-tag">TypeScript</span>
+                <button type="button" class="copy-btn" id="copy-snippet" aria-label="Copy code sample">
+                  Copy
+                </button>
+              </div>
+            </div>
+            <pre id="snippet-pre"><code><span class="tok-k">import</span> { <span class="tok-t">PrismaClient</span> } <span class="tok-k">from</span> <span class="tok-s">"@prisma/client"</span>;
+<span class="tok-k">import</span> {
+  <span class="tok-t">createSlowQueryDetector</span>,
+  <span class="tok-t">wrapPrismaClient</span>,
+  <span class="tok-t">createConsoleLogger</span>,
+  <span class="tok-t">runWithDbContext</span>,
+} <span class="tok-k">from</span> <span class="tok-s">"@olegkoval/queryd"</span>;
 
-const base = new PrismaClient();
-const detector = createSlowQueryDetector(
-  { warnThresholdMs: 200, dbName: "primary" },
-  { logger: createConsoleLogger() },
+<span class="tok-k">const</span> base = <span class="tok-k">new</span> <span class="tok-f">PrismaClient</span>();
+<span class="tok-k">const</span> detector = <span class="tok-f">createSlowQueryDetector</span>(
+  { warnThresholdMs: <span class="tok-t">200</span>, dbName: <span class="tok-s">"primary"</span> },
+  { logger: <span class="tok-f">createConsoleLogger</span>() },
 );
-export const prisma = wrapPrismaClient(base, detector);
+<span class="tok-k">export const</span> prisma = <span class="tok-f">wrapPrismaClient</span>(base, detector);
 
-await runWithDbContext({ requestId: "req-1", userId: "u-1" }, async () => {
-  await prisma.$queryRaw`SELECT 1`;
+<span class="tok-k">await</span> <span class="tok-f">runWithDbContext</span>({ requestId: <span class="tok-s">"req-1"</span>, userId: <span class="tok-s">"u-1"</span> }, <span class="tok-k">async</span> () => {
+  <span class="tok-k">await</span> prisma.$queryRaw<span class="tok-s">`SELECT 1`</span>;
 });</code></pre>
+          </div>
         </div>
       </section>
 
@@ -420,5 +594,26 @@ await runWithDbContext({ requestId: "req-1", userId: "u-1" }, async () => {
         · package name on npm is <strong>@olegkoval/queryd</strong>
       </p>
     </main>
+    <script>
+      (function () {
+        var btn = document.getElementById("copy-snippet");
+        var pre = document.getElementById("snippet-pre");
+        if (!btn || !pre) return;
+        btn.addEventListener("click", function () {
+          var text = pre.innerText;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+              btn.setAttribute("data-copied", "true");
+              var t = btn.textContent;
+              btn.textContent = "Copied";
+              setTimeout(function () {
+                btn.textContent = t;
+                btn.removeAttribute("data-copied");
+              }, 2000);
+            });
+          }
+        });
+      })();
+    </script>
   </body>
 </html>
