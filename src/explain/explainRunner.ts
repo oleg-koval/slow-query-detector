@@ -16,9 +16,10 @@ export function createExplainRunner(prisma: PrismaClient): IExplainRunner {
         // SQL has $1, $2, etc. placeholders from extractQueryInfo
         // $queryRawUnsafe supports $1, $2 placeholders when params are passed as separate args
         const explainSql = `EXPLAIN ANALYZE ${sql}`;
-        const result = await (
-          prisma.$queryRawUnsafe as (sql: string, ...params: unknown[]) => Promise<unknown>
-        )(explainSql, ...params);
+        const result: unknown = await Reflect.apply(prisma.$queryRawUnsafe, prisma, [
+          explainSql,
+          ...params,
+        ]);
 
         // Format result as string
         if (Array.isArray(result)) {

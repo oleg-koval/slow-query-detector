@@ -16,6 +16,17 @@ import { createQueryEvent } from "./eventFactory";
 import { shouldRunExplain } from "./explain/explainGate";
 import { ExplainThrottle } from "./explain/throttle";
 
+const readNumericRowCount = (result: unknown): number | undefined => {
+  if (typeof result !== "object" || result === null) {
+    return undefined;
+  }
+  if (!("count" in result)) {
+    return undefined;
+  }
+  const count = Reflect.get(result, "count");
+  return typeof count === "number" ? count : undefined;
+};
+
 /**
  * Slow query detector
  */
@@ -35,7 +46,7 @@ export class SlowQueryDetector {
    * Execute a query with instrumentation
    */
   async executeQuery<T>(
-    queryFn: () => Promise<T>,
+    queryFn: () => PromiseLike<T>,
     metadata: {
       sql: string;
       params: unknown[];
@@ -53,14 +64,11 @@ export class SlowQueryDetector {
       // Try to extract row count from various result shapes
       if (Array.isArray(result)) {
         rowCount = result.length;
-      } else if (
-        result &&
-        typeof result === "object" &&
-        "count" in result &&
-        typeof (result as { count: unknown }).count === "number"
-      ) {
-        // Handle Prisma count results: { count: number }
-        rowCount = (result as { count: number }).count;
+      } else {
+        const count = readNumericRowCount(result);
+        if (count !== undefined) {
+          rowCount = count;
+        }
       }
 
       return result;

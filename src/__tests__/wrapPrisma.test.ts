@@ -100,6 +100,26 @@ describe("wrapPrisma", () => {
     expect(result).toEqual([{ id: 1 }, { id: 2 }]);
   });
 
+  it("should forward $queryRaw when the first argument is not a template literal array", async () => {
+    const wrapped = wrapPrisma(mockPrisma as unknown as PrismaClient, detector);
+    const notTemplate = ["SELECT 1"];
+    await (wrapped.$queryRaw as (sql: unknown, ...values: unknown[]) => Promise<unknown>)(notTemplate);
+    expect(originalQueryRaw).toHaveBeenCalledWith(notTemplate);
+  });
+
+  it("should forward $executeRaw when the first argument is not a template literal array", async () => {
+    const wrapped = wrapPrisma(mockPrisma as unknown as PrismaClient, detector);
+    const notTemplate = ["UPDATE t SET x = 1"];
+    await (wrapped.$executeRaw as (sql: unknown, ...values: unknown[]) => Promise<unknown>)(notTemplate);
+    expect(originalExecuteRaw).toHaveBeenCalledWith(notTemplate);
+  });
+
+  it("should return the client unchanged when raw methods are missing", () => {
+    const incomplete = { $queryRaw: vi.fn(), $executeRaw: vi.fn() };
+    const wrapped = wrapPrisma(incomplete as unknown as PrismaClient, detector);
+    expect(wrapped).toBe(incomplete);
+  });
+
   it("should extract SQL and params from template literal", async () => {
     const sinkHandle = vi.fn();
     const mockSink = { handle: sinkHandle };
