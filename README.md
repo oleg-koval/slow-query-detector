@@ -55,7 +55,7 @@ Use `ILogger` and wire your adapter (e.g. `@sentry/nextjs` `captureMessage` / `c
 ## Roadmap
 
 - `@queryd/core` scoped publish (if namespace available)
-- Companion packages: `queryd-go`, `queryd-py`
+- Companion packages: `queryd-go`, `queryd-py` (WIP)
 - Raise test coverage thresholds back toward 100% (edge branches in `ExplainThrottle` / nested transaction paths)
 
 ## License
