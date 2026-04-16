@@ -1,7 +1,7 @@
 {
   "name": "queryd",
   "version": "0.1.0",
-  "description": "Database query latency detector for Node.js (Prisma-friendly)",
+  "description": "queryd — detect slow database queries in Node.js: Prisma-friendly latency budgets, sampling, and optional EXPLAIN for Postgres/MySQL/SQLite (early-stage OSS).",
   "main": "./dist/index.js",
   "exports": {
     ".": {
@@ -33,25 +33,48 @@
     "format:check": "prettier --check \"**/*.{ts,js,json,md,yml,yaml}\"",
     "typecheck": "tsc --noEmit",
     "test:coverage": "vitest run --coverage",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "semantic-release": "semantic-release",
+    "release:dry-run": "semantic-release --dry-run --no-ci"
   },
   "keywords": [
     "queryd",
-    "database",
-    "prisma",
     "slow-query",
+    "slow-query-log",
+    "database",
+    "sql",
+    "postgresql",
+    "mysql",
+    "sqlite",
+    "prisma",
+    "orm",
+    "nodejs",
+    "typescript",
     "observability",
+    "apm",
+    "monitoring",
     "performance",
-    "latency"
+    "latency",
+    "query-performance",
+    "database-performance",
+    "profiling"
   ],
-  "author": "Oleg Koval",
+  "author": "Oleg Koval (https://github.com/oleg-koval)",
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.6",
+    "@semantic-release/npm": "^13.1.5",
+    "@semantic-release/release-notes-generator": "^14.1.0",
     "@types/node": "^25.6.0",
     "@vitest/coverage-v8": "^4.1.4",
     "eslint": "^10.2.0",
     "prettier": "^3.8.3",
+    "semantic-release": "^25.0.3",
+    "semantic-release-npm-github-publish": "^1.7.3",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.58.2",
     "vitest": "^4.1.4"
