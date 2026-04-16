@@ -33,7 +33,9 @@
     "format:check": "prettier --check \"**/*.{ts,js,json,md,yml,yaml}\"",
     "typecheck": "tsc --noEmit",
     "test:coverage": "vitest run --coverage",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "release:dry-run": "semantic-release --dry-run",
+    "semantic-release": "semantic-release"
   },
   "keywords": [
     "queryd",
