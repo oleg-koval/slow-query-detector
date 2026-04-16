@@ -1,9 +1,9 @@
 # queryd
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Node](https://img.shields.io/node/v/queryd.svg)](https://nodejs.org/)
+[![Node](https://img.shields.io/node/v/@olegkoval%2Fqueryd.svg)](https://nodejs.org/)
 
-<!-- npm badge after first publish: [![npm](https://img.shields.io/npm/v/queryd.svg)](https://www.npmjs.com/package/queryd) -->
+<!-- npm: [![npm](https://img.shields.io/npm/v/@olegkoval%2Fqueryd.svg)](https://www.npmjs.com/package/@olegkoval/queryd) -->
 
 **queryd** is a database query latency detector for Node.js, with first-class **Prisma** support (`$queryRaw`, `$executeRaw`, interactive `$transaction`), sampling, optional `EXPLAIN ANALYZE`, and pluggable sinks.
 
@@ -14,7 +14,7 @@ Install `@prisma/client` in your app (same major as your schema). `queryd` does 
 ## Install
 
 ```bash
-npm install queryd @prisma/client
+npm install @olegkoval/queryd @prisma/client
 ```
 
 ## Usage
@@ -26,7 +26,7 @@ import {
   wrapPrismaClient,
   createConsoleLogger,
   runWithDbContext,
-} from "queryd";
+} from "@olegkoval/queryd";
 
 const base = new PrismaClient();
 const detector = createSlowQueryDetector(

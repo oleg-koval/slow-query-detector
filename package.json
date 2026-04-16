@@ -1,5 +1,5 @@
 {
-  "name": "queryd",
+  "name": "@olegkoval/queryd",
   "version": "0.1.0",
   "description": "Database query latency detector for Node.js (Prisma-friendly)",
   "main": "./dist/index.js",
