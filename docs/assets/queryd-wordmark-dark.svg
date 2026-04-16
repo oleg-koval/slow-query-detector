@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 52" role="img" aria-label="queryd">
   <defs>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&amp;display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Geologica:wght@700&amp;display=swap");
       .logotype {
-        font-family: "Geologica", system-ui, sans-serif;
+        font-family: "Geologica", system-ui, -apple-system, "Segoe UI", sans-serif;
         font-weight: 700;
         font-size: 36px;
         letter-spacing: -0.045em;
