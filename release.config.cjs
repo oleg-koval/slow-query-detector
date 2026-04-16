@@ -35,7 +35,7 @@ module.exports = {
     [
       "@semantic-release/npm",
       {
-        // true after npm Trusted Publisher (OIDC); token-based publish uses NPM_TOKEN in CI.
+        // true after npm Trusted Publisher (OIDC); CI maps repo secret NPM_SECRET to env NPM_TOKEN.
         provenance: false,
       },
     ],
