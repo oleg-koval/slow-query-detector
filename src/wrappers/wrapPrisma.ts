@@ -24,11 +24,12 @@ const isRawMethodsClient = (value: unknown): value is RawMethodsClient & object 
   "$transaction" in value;
 
 const isTemplateStringsArray = (value: unknown): value is TemplateStringsArray =>
-  Array.isArray(value) &&
-  "raw" in value &&
-  Array.isArray(Reflect.get(value, "raw"));
+  Array.isArray(value) && "raw" in value && Array.isArray(Reflect.get(value, "raw"));
 
-function instrumentRawMethods(client: RawMethodsClient & object, detector: SlowQueryDetector): void {
+function instrumentRawMethods(
+  client: RawMethodsClient & object,
+  detector: SlowQueryDetector,
+): void {
   if (isInstrumented(client)) {
     return;
   }

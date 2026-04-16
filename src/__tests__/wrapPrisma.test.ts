@@ -103,14 +103,18 @@ describe("wrapPrisma", () => {
   it("should forward $queryRaw when the first argument is not a template literal array", async () => {
     const wrapped = wrapPrisma(mockPrisma as unknown as PrismaClient, detector);
     const notTemplate = ["SELECT 1"];
-    await (wrapped.$queryRaw as (sql: unknown, ...values: unknown[]) => Promise<unknown>)(notTemplate);
+    await (wrapped.$queryRaw as (sql: unknown, ...values: unknown[]) => Promise<unknown>)(
+      notTemplate,
+    );
     expect(originalQueryRaw).toHaveBeenCalledWith(notTemplate);
   });
 
   it("should forward $executeRaw when the first argument is not a template literal array", async () => {
     const wrapped = wrapPrisma(mockPrisma as unknown as PrismaClient, detector);
     const notTemplate = ["UPDATE t SET x = 1"];
-    await (wrapped.$executeRaw as (sql: unknown, ...values: unknown[]) => Promise<unknown>)(notTemplate);
+    await (wrapped.$executeRaw as (sql: unknown, ...values: unknown[]) => Promise<unknown>)(
+      notTemplate,
+    );
     expect(originalExecuteRaw).toHaveBeenCalledWith(notTemplate);
   });
 
