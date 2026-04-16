@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from "async_hooks";
+import type { IContextProvider } from "./types";
 
 export type DbContext = {
   requestId?: string;
@@ -13,4 +14,17 @@ export const runWithDbContext = async <T>(context: DbContext, fn: () => Promise<
 
 export const getDbContext = (): DbContext => {
   return dbContextStorage.getStore() ?? {};
+};
+
+/**
+ * Safe read of optional context provider (never throws).
+ */
+export const resolveDetectorContext = (
+  contextProvider?: IContextProvider,
+): { requestId?: string; userId?: string } => {
+  try {
+    return contextProvider?.getContext() ?? {};
+  } catch {
+    return {};
+  }
 };

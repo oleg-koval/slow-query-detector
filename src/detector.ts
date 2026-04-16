@@ -10,11 +10,13 @@ import type {
   IEventSink,
   IExplainRunner,
 } from "./types";
+import { resolveDetectorContext } from "./context";
 import { startTimer } from "./timer";
 import { classifyQuery } from "./classifier";
 import { createQueryEvent } from "./eventFactory";
 import { shouldRunExplain } from "./explain/explainGate";
 import { ExplainThrottle } from "./explain/throttle";
+import { RequestBudgetTracker } from "./requestBudgetTracker";
 
 const readNumericRowCount = (result: unknown): number | undefined => {
   if (typeof result !== "object" || result === null) {
@@ -32,6 +34,7 @@ const readNumericRowCount = (result: unknown): number | undefined => {
  */
 export class SlowQueryDetector {
   private readonly explainThrottle: ExplainThrottle;
+  private readonly requestBudgetTracker: RequestBudgetTracker | undefined;
 
   constructor(
     public readonly config: SlowQueryDetectorConfig,
@@ -40,6 +43,12 @@ export class SlowQueryDetector {
     public explainRunner?: IExplainRunner,
   ) {
     this.explainThrottle = new ExplainThrottle();
+    const rb = config.requestBudget;
+    const budgetEnabled =
+      rb !== undefined && (rb.maxQueries !== undefined || rb.maxTotalDurationMs !== undefined);
+    this.requestBudgetTracker = budgetEnabled
+      ? new RequestBudgetTracker(rb.maxTrackedRequests)
+      : undefined;
   }
 
   /**
@@ -98,6 +107,30 @@ export class SlowQueryDetector {
         } catch {
           // Don't fail query if sink fails - log but continue
           // Sink errors should not break query execution
+        }
+      }
+
+      const budget = this.config.requestBudget;
+      if (this.requestBudgetTracker && budget) {
+        const ctx = resolveDetectorContext(this.contextProvider);
+        const requestId = ctx.requestId;
+        if (requestId !== undefined && requestId !== "") {
+          const violation = this.requestBudgetTracker.record(
+            requestId,
+            ctx.userId,
+            durationMs,
+            budget,
+            this.config.dbName,
+          );
+          if (violation !== undefined) {
+            for (const sink of this.sinks) {
+              try {
+                sink.handle(violation);
+              } catch {
+                // Ignore sink errors
+              }
+            }
+          }
         }
       }
 

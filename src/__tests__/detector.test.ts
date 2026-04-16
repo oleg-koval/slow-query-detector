@@ -3,8 +3,15 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { runWithDbContext } from "../context";
 import { SlowQueryDetector } from "../detector";
-import type { ILogger, IEventSink, QueryEvent } from "../types";
+import type {
+  ILogger,
+  IEventSink,
+  QueryEvent,
+  DetectorEvent,
+  RequestBudgetViolationEvent,
+} from "../types";
 import { LoggerSink } from "../sinks/loggerSink";
 
 describe("detector", () => {
@@ -115,5 +122,125 @@ describe("detector", () => {
     const event = sinkHandle.mock.calls[0][0] as QueryEvent;
     expect(event.requestId).toBe("req-123");
     expect(event.userId).toBe("user-456");
+  });
+
+  it("should emit request budget violation once when maxQueries exceeded", async () => {
+    const contextProvider = {
+      getContext: () => ({ requestId: "req-budget", userId: "u" }),
+    };
+    const detector = new SlowQueryDetector(
+      { warnThresholdMs: 999_999, requestBudget: { maxQueries: 2 } },
+      contextProvider,
+      [mockSink],
+    );
+
+    for (let i = 0; i < 3; i++) {
+      await detector.executeQuery(async () => [], { sql: `SELECT ${i}`, params: [] });
+    }
+
+    const events = sinkHandle.mock.calls.map((c) => c[0] as DetectorEvent);
+    expect(events.filter((e) => e.event === "db.request.budget")).toHaveLength(1);
+    expect(events.filter((e) => e.event === "db.query")).toHaveLength(3);
+  });
+
+  it("counts failed queries toward request budget (same as successful)", async () => {
+    const contextProvider = {
+      getContext: () => ({ requestId: "req-err-budget" }),
+    };
+    const detector = new SlowQueryDetector(
+      { warnThresholdMs: 999_999, requestBudget: { maxQueries: 1 } },
+      contextProvider,
+      [mockSink],
+    );
+
+    await expect(
+      detector.executeQuery(async () => {
+        throw new Error("fail-one");
+      }, { sql: "SELECT 1", params: [] }),
+    ).rejects.toThrow("fail-one");
+
+    await expect(
+      detector.executeQuery(async () => {
+        throw new Error("fail-two");
+      }, { sql: "SELECT 2", params: [] }),
+    ).rejects.toThrow("fail-two");
+
+    const budgets = sinkHandle.mock.calls
+      .map((c) => c[0])
+      .filter((e): e is RequestBudgetViolationEvent => {
+        return (
+          typeof e === "object" &&
+          e !== null &&
+          "event" in e &&
+          (e as { event: string }).event === "db.request.budget"
+        );
+      });
+    expect(budgets).toHaveLength(1);
+    expect(budgets[0]?.queryCount).toBe(2);
+
+    const errors = sinkHandle.mock.calls
+      .map((c) => c[0])
+      .filter((e): e is QueryEvent => {
+        return (
+          typeof e === "object" &&
+          e !== null &&
+          "event" in e &&
+          (e as QueryEvent).event === "db.query" &&
+          (e as QueryEvent).subtype === "error"
+        );
+      });
+    expect(errors).toHaveLength(2);
+  });
+
+  it("does not read AsyncLocalStorage when contextProvider is undefined (factory vs constructor)", async () => {
+    const detector = new SlowQueryDetector(
+      { warnThresholdMs: 999_999, requestBudget: { maxQueries: 1 } },
+      undefined,
+      [mockSink],
+    );
+
+    await runWithDbContext({ requestId: "als-only" }, async () => {
+      await detector.executeQuery(async () => [], { sql: "SELECT 1", params: [] });
+      await detector.executeQuery(async () => [], { sql: "SELECT 2", params: [] });
+    });
+
+    const budgets = sinkHandle.mock.calls.filter(
+      (c) =>
+        typeof c[0] === "object" &&
+        c[0] !== null &&
+        (c[0] as { event?: string }).event === "db.request.budget",
+    );
+    expect(budgets).toHaveLength(0);
+  });
+
+  it("emits only one budget violation when a second configured limit would also be exceeded later", async () => {
+    const contextProvider = {
+      getContext: () => ({ requestId: "dual-limit" }),
+    };
+    const detector = new SlowQueryDetector(
+      {
+        warnThresholdMs: 999_999,
+        requestBudget: { maxQueries: 2, maxTotalDurationMs: 1_000_000 },
+      },
+      contextProvider,
+      [mockSink],
+    );
+
+    for (let i = 0; i < 3; i++) {
+      await detector.executeQuery(async () => [], { sql: `SELECT ${i}`, params: [] });
+    }
+
+    await detector.executeQuery(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      return [];
+    }, { sql: "SELECT slow", params: [] });
+
+    const budgetEvents = sinkHandle.mock.calls.filter(
+      (c) =>
+        typeof c[0] === "object" &&
+        c[0] !== null &&
+        (c[0] as { event?: string }).event === "db.request.budget",
+    );
+    expect(budgetEvents).toHaveLength(1);
   });
 });

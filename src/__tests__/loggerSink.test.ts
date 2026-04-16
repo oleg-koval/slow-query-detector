@@ -4,7 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { LoggerSink } from "../sinks/loggerSink";
-import type { QueryEvent, ILogger } from "../types";
+import type { QueryEvent, ILogger, RequestBudgetViolationEvent } from "../types";
 
 describe("loggerSink", () => {
   let mockLogger: ILogger;
@@ -86,6 +86,25 @@ describe("loggerSink", () => {
     sink.handle(event);
 
     expect(mockLogger.info).toHaveBeenCalledWith(event);
+  });
+
+  it("should log request budget violations with logger.warn", () => {
+    const sink = new LoggerSink(mockLogger, {});
+    const event: RequestBudgetViolationEvent = {
+      event: "db.request.budget",
+      subtype: "violation",
+      timestamp: new Date().toISOString(),
+      requestId: "req-1",
+      queryCount: 50,
+      totalDurationMs: 120,
+      maxQueries: 30,
+    };
+
+    sink.handle(event);
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(event);
+    expect(mockLogger.error).not.toHaveBeenCalled();
+    expect(mockLogger.info).not.toHaveBeenCalled();
   });
 
   it("should not log normal events when sampleRateNormal is 0", () => {

@@ -9,6 +9,7 @@ import type {
   SlowQueryDetectorConfig,
   IContextProvider,
 } from "./types";
+import { resolveDetectorContext } from "./context";
 import { sanitizeSql, redactParams } from "./redaction";
 
 /**
@@ -20,14 +21,7 @@ export function createQueryEvent(
   config: SlowQueryDetectorConfig,
   contextProvider?: IContextProvider,
 ): QueryEvent {
-  // Safely get context with error handling
-  let context: { requestId?: string; userId?: string } = {};
-  try {
-    context = contextProvider?.getContext() ?? {};
-  } catch {
-    // Context provider errors should not break event creation
-    // Context is optional metadata
-  }
+  const context = resolveDetectorContext(contextProvider);
 
   const sanitizedSql = sanitizeSql(metadata.sql);
   const redactedParams = redactParams(metadata.params, config.paramsRedactor);
