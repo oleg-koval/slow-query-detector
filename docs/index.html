@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0c0c0e" />
+    <title>queryd — slow query detection for Node.js</title>
+    <meta
+      name="description"
+      content="queryd detects database query latency in Node.js. Prisma-friendly budgets, sampling, and optional EXPLAIN — early-stage OSS."
+    />
+    <meta property="og:title" content="queryd" />
+    <meta
+      property="og:description"
+      content="Database query latency detector for Node.js — budgets, sampling, optional EXPLAIN."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:image"
+      content="https://oleg-koval.github.io/slow-query-detector/assets/logo.png"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg0: #070708;
+        --bg1: #0c0c0f;
+        --fg: #f4f4f5;
+        --muted: #a1a1aa;
+        --line: rgba(255, 255, 255, 0.08);
+        --cyan: #5eead4;
+        --cyan-dim: rgba(94, 234, 212, 0.14);
+        --shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+        --radius: 16px;
+        --font: "DM Sans", system-ui, -apple-system, Segoe UI, sans-serif;
+        --mono: "JetBrains Mono", ui-monospace, monospace;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        .reveal {
+          animation: none !important;
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: var(--font);
+        color: var(--fg);
+        background: radial-gradient(1200px 800px at 12% -10%, rgba(94, 234, 212, 0.08), transparent 55%),
+          radial-gradient(900px 600px at 88% 0%, rgba(56, 189, 248, 0.06), transparent 50%),
+          linear-gradient(180deg, var(--bg0), var(--bg1) 32%, var(--bg0));
+        line-height: 1.55;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .wrap {
+        width: min(1080px, calc(100% - 40px));
+        margin-inline: auto;
+      }
+
+      header {
+        padding: 28px 0 8px;
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(10px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: linear-gradient(180deg, rgba(7, 7, 8, 0.92), rgba(7, 7, 8, 0.65), transparent);
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+
+      .brand img {
+        height: 36px;
+        width: auto;
+        display: block;
+      }
+
+      .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: flex-end;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--fg);
+        background: rgba(255, 255, 255, 0.03);
+        transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+      }
+
+      .pill:hover {
+        border-color: rgba(94, 234, 212, 0.45);
+        background: rgba(94, 234, 212, 0.06);
+        transform: translateY(-1px);
+      }
+
+      .pill.primary {
+        border-color: rgba(94, 234, 212, 0.55);
+        background: linear-gradient(135deg, rgba(94, 234, 212, 0.18), rgba(56, 189, 248, 0.08));
+      }
+
+      .hero {
+        padding: 72px 0 56px;
+        text-align: center;
+      }
+
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.82rem;
+        margin-bottom: 22px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .pulse-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--cyan);
+        box-shadow: 0 0 0 6px var(--cyan-dim);
+      }
+
+      .hero-logo {
+        width: min(520px, 92vw);
+        height: auto;
+        margin: 0 auto 28px;
+        filter: drop-shadow(0 28px 48px rgba(0, 0, 0, 0.45));
+      }
+
+      h1 {
+        font-size: clamp(2rem, 4vw, 2.75rem);
+        line-height: 1.12;
+        margin: 0 0 14px;
+        letter-spacing: -0.03em;
+      }
+
+      .lede {
+        margin: 0 auto 32px;
+        max-width: 640px;
+        color: var(--muted);
+        font-size: 1.1rem;
+      }
+
+      .cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+        margin-bottom: 56px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        margin-bottom: 56px;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 22px 22px 20px;
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: -40% -20% auto;
+        height: 120px;
+        background: radial-gradient(closest-side, rgba(94, 234, 212, 0.12), transparent 70%);
+        pointer-events: none;
+      }
+
+      .card h3 {
+        margin: 0 0 10px;
+        font-size: 1.05rem;
+        letter-spacing: -0.02em;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .code-panel {
+        border-radius: var(--radius);
+        border: 1px solid var(--line);
+        background: rgba(0, 0, 0, 0.35);
+        padding: 20px 22px;
+        margin-bottom: 56px;
+        box-shadow: var(--shadow);
+      }
+
+      .code-panel .label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+
+      pre {
+        margin: 0;
+        font-family: var(--mono);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: #e4e4e7;
+        overflow-x: auto;
+      }
+
+      .footnote {
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+        padding: 32px 0 48px;
+        border-top: 1px solid var(--line);
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(12px);
+        animation: rise 0.7s ease forwards;
+      }
+
+      .reveal:nth-child(2) {
+        animation-delay: 0.06s;
+      }
+      .reveal:nth-child(3) {
+        animation-delay: 0.12s;
+      }
+      .reveal:nth-child(4) {
+        animation-delay: 0.18s;
+      }
+
+      @keyframes rise {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap nav">
+        <a class="brand" href="./">
+          <img src="./assets/logo.png" alt="queryd" width="180" height="48" />
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a class="pill" href="https://github.com/oleg-koval/slow-query-detector">Repository</a>
+          <a class="pill" href="https://github.com/oleg-koval/slow-query-detector/issues">Issues</a>
+          <a class="pill primary" href="https://www.npmjs.com/package/queryd">npm → queryd</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero wrap">
+        <div class="hero-badge reveal">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          Early-stage OSS · pin a version in <code>0.x</code>
+        </div>
+        <img
+          class="hero-logo reveal"
+          src="./assets/logo.png"
+          alt="queryd wordmark"
+          width="640"
+          height="180"
+          fetchpriority="high"
+        />
+        <h1 class="reveal">Latency budgets for the SQL your Node app actually runs.</h1>
+        <p class="lede reveal">
+          <strong style="color: var(--fg)">queryd</strong> is a database query latency detector for Node.js. Prisma-friendly
+          integration, sampling, and an optional <code>EXPLAIN</code> pipeline are landing as the core migrates from
+          production code into this package.
+        </p>
+        <div class="cta-row reveal">
+          <a class="pill primary" href="https://www.npmjs.com/package/queryd">Install from npm</a>
+          <a class="pill" href="https://github.com/oleg-koval/slow-query-detector/blob/main/README.md">Read the README</a>
+        </div>
+
+        <div class="grid">
+          <article class="card reveal">
+            <h3>Budgets, not vibes</h3>
+            <p>Flag database work that exceeds a latency threshold so regressions surface before users feel them.</p>
+          </article>
+          <article class="card reveal">
+            <h3>Prisma-shaped path</h3>
+            <p>Designed for common Node + ORM setups; the goal is ergonomic hooks instead of hand-rolled timers.</p>
+          </article>
+          <article class="card reveal">
+            <h3>Predictable overhead</h3>
+            <p>Sampling-first design so observability stays cheap enough to leave on in production.</p>
+          </article>
+          <article class="card reveal">
+            <h3>Explain the worst</h3>
+            <p>Optional EXPLAIN pipeline to inspect the slowest offenders when you need depth, not noise.</p>
+          </article>
+        </div>
+
+        <div class="code-panel reveal">
+          <div class="label">Today (placeholder API)</div>
+          <pre><code>import { getVersion } from "queryd";
+
+console.log(getVersion());</code></pre>
+        </div>
+      </section>
+
+      <p class="footnote wrap">
+        MIT licensed ·
+        <a href="https://github.com/oleg-koval/slow-query-detector">oleg-koval/slow-query-detector</a>
+        · package name on npm is <strong>queryd</strong>
+      </p>
+    </main>
+  </body>
+</html>

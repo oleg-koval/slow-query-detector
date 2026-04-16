@@ -1,5 +1,11 @@
 # queryd
 
+<p align="center">
+  <a href="https://oleg-koval.github.io/slow-query-detector/" title="queryd microsite">
+    <img src="./docs/assets/logo.png" alt="queryd logo" width="480" />
+  </a>
+</p>
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![npm](https://img.shields.io/npm/v/queryd.svg)](https://www.npmjs.com/package/queryd)
 [![Node](https://img.shields.io/node/v/queryd.svg)](https://nodejs.org/)
@@ -8,6 +14,8 @@
 **queryd** is a database query latency detector for Node.js. The full Prisma integration, sampling, and optional `EXPLAIN` pipeline is being extracted from production code into this open source package.
 
 **GitHub:** [oleg-koval/slow-query-detector](https://github.com/oleg-koval/slow-query-detector) — npm package name is **queryd**.
+
+**Site (GitHub Pages):** [oleg-koval.github.io/slow-query-detector](https://oleg-koval.github.io/slow-query-detector/) — logo, overview, and install links. Enable **Settings → Pages → Source: GitHub Actions** the first time so the [`pages` workflow](.github/workflows/pages.yml) can publish.
 
 ## What you are installing (honest snapshot)
 
