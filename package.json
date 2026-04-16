@@ -1,7 +1,7 @@
 {
   "name": "queryd",
   "version": "0.1.0",
-  "description": "queryd — detect slow database queries in Node.js: Prisma-friendly latency budgets, sampling, and optional EXPLAIN for Postgres/MySQL/SQLite (early-stage OSS).",
+  "description": "Database query latency detector for Node.js (Prisma-friendly)",
   "main": "./dist/index.js",
   "exports": {
     ".": {
@@ -24,62 +24,46 @@
   "bugs": {
     "url": "https://github.com/oleg-koval/slow-query-detector/issues"
   },
-  "homepage": "https://oleg-koval.github.io/slow-query-detector/",
+  "homepage": "https://github.com/oleg-koval/slow-query-detector#readme",
   "scripts": {
     "test": "vitest run",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,js,json,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,js,json,md,yml,yaml}\"",
     "typecheck": "tsc --noEmit",
     "test:coverage": "vitest run --coverage",
-    "prepare": "npm run build",
-    "semantic-release": "semantic-release",
-    "release:dry-run": "semantic-release --dry-run --no-ci"
+    "prepare": "npm run build"
   },
   "keywords": [
     "queryd",
-    "slow-query",
-    "slow-query-log",
     "database",
-    "sql",
-    "postgresql",
-    "mysql",
-    "sqlite",
     "prisma",
-    "orm",
-    "nodejs",
-    "typescript",
+    "slow-query",
     "observability",
-    "apm",
-    "monitoring",
     "performance",
-    "latency",
-    "query-performance",
-    "database-performance",
-    "profiling"
+    "latency"
   ],
-  "author": "Oleg Koval (https://github.com/oleg-koval)",
+  "author": "Oleg Koval",
   "license": "MIT",
+  "peerDependencies": {
+    "@prisma/client": ">=5.0.0"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/commit-analyzer": "^13.0.1",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^12.0.6",
-    "@semantic-release/npm": "^13.1.5",
-    "@semantic-release/release-notes-generator": "^14.1.0",
+    "@prisma/client": "^6.19.0",
     "@types/node": "^25.6.0",
     "@vitest/coverage-v8": "^4.1.4",
     "eslint": "^10.2.0",
     "prettier": "^3.8.3",
-    "semantic-release": "^25.0.3",
-    "semantic-release-npm-github-publish": "^1.7.3",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.58.2",
     "vitest": "^4.1.4"
   },
   "type": "module",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts"
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "globals": "^17.5.0"
+  }
 }
