@@ -13,7 +13,8 @@ permissions:
   checks: write
 
 jobs:
-  test:
+  # Separate jobs so each name appears as a GitHub status check (branch protection).
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +24,27 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
       - run: npm run format:check
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
       - run: npm run test:coverage
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
@@ -33,7 +54,7 @@ jobs:
       - run: npm run build
 
   release-readiness:
-    needs: test
+    needs: [lint, format, test]
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
@@ -52,7 +73,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   release:
-    needs: [test, release-readiness]
+    needs: [lint, format, test, release-readiness]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta')
     runs-on: ubuntu-latest
     steps:
