@@ -22,6 +22,10 @@ npm install @olegkoval/queryd
 
 Add `@prisma/client` only if you use the Prisma entry (see below).
 
+### Git hooks (contributors)
+
+`npm install` enables a **pre-commit** hook ([Husky](https://typicode.github.io/husky/)) that runs **`npm run lint`**, **`npm run format:check`**, and **`npm test`**. To skip hooks for a one-off commit: `HUSKY=0 git commit …`.
+
 ## Usage (any stack)
 
 `SlowQueryDetector.executeQuery` runs your callback and emits structured events (`QueryEvent` for each query, and optionally `RequestBudgetViolationEvent` — see [Request budgets](#request-budgets-per-requestid)). Wrappers cover common shapes:
