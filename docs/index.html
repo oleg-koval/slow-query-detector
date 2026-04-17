@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="canonical" href="https://oleg-koval.github.io/slow-query-detector/" />
     <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="oklch(0.13 0.014 240)" />
+    <meta name="theme-color" content="oklch(0.14 0.012 240)" />
     <title>queryd — slow query detection for Node.js</title>
     <meta
       name="description"
@@ -51,17 +51,17 @@
       :root {
         --hue: 238;
         --accent-hue: 168;
-        --bg-deep: oklch(0.12 0.018 var(--hue));
-        --bg-raised: oklch(0.16 0.02 var(--hue));
-        --bg-code: oklch(0.1 0.015 var(--hue));
-        --fg: oklch(0.93 0.012 var(--hue));
-        --fg-soft: oklch(0.72 0.028 var(--hue));
-        --line: color-mix(in oklch, var(--fg) 12%, transparent);
-        --accent: oklch(0.72 0.11 var(--accent-hue));
-        --accent-soft: color-mix(in oklch, var(--accent) 22%, transparent);
+        --bg-deep: oklch(0.14 0.012 var(--hue));
+        --bg-raised: oklch(0.17 0.014 var(--hue));
+        --bg-code: oklch(0.12 0.012 var(--hue));
+        --fg: oklch(0.92 0.01 var(--hue));
+        --fg-soft: oklch(0.7 0.022 var(--hue));
+        --line: color-mix(in oklch, var(--fg) 10%, transparent);
+        --accent: oklch(0.68 0.075 var(--accent-hue));
+        --accent-soft: color-mix(in oklch, var(--accent) 16%, transparent);
         --radius-sm: 10px;
         --radius-md: 14px;
-        --radius-lg: 20px;
+        --radius-lg: 18px;
         --space-3: 12px;
         --space-4: 16px;
         --space-5: 24px;
@@ -71,7 +71,8 @@
         --font-body: "Literata", "Georgia", serif;
         --font-display: "Geologica", system-ui, sans-serif;
         --font-mono: "JetBrains Mono", ui-monospace, monospace;
-        --shadow: 0 28px 90px oklch(0.05 0.02 var(--hue) / 0.55);
+        --shadow: 0 12px 32px oklch(0.06 0.015 var(--hue) / 0.28);
+        --shadow-soft: 0 1px 0 oklch(0.5 0.02 var(--hue) / 0.06);
       }
 
       *,
@@ -103,12 +104,6 @@
         line-height: 1.62;
         color: var(--fg);
         background: var(--bg-deep);
-        background-image: radial-gradient(
-            ellipse 100% 80% at 0% -20%,
-            oklch(0.22 0.04 var(--accent-hue) / 0.12),
-            transparent 55%
-          ),
-          radial-gradient(ellipse 70% 50% at 100% 0%, oklch(0.2 0.035 var(--hue) / 0.2), transparent 45%);
       }
 
       a {
@@ -147,8 +142,7 @@
       header {
         padding: var(--space-5) 0 var(--space-4);
         border-bottom: 1px solid var(--line);
-        background: color-mix(in oklch, var(--bg-deep) 88%, transparent);
-        backdrop-filter: blur(12px);
+        background: var(--bg-deep);
         position: sticky;
         top: 0;
         z-index: 10;
@@ -201,23 +195,24 @@
         font-weight: 500;
         letter-spacing: 0.01em;
         color: var(--fg);
-        background: oklch(0.18 0.018 var(--hue) / 0.65);
-        transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+        background: var(--bg-raised);
+        box-shadow: var(--shadow-soft);
+        transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
       }
 
       .pill:hover {
-        border-color: color-mix(in oklch, var(--accent) 55%, var(--line));
-        background: oklch(0.2 0.022 var(--hue) / 0.85);
+        border-color: color-mix(in oklch, var(--accent) 40%, var(--line));
+        background: oklch(0.19 0.016 var(--hue));
       }
 
       .pill.primary {
-        border-color: color-mix(in oklch, var(--accent) 45%, var(--line));
+        border-color: color-mix(in oklch, var(--accent) 32%, var(--line));
         background: var(--accent-soft);
         color: var(--fg);
       }
 
       .pill.primary:hover {
-        background: color-mix(in oklch, var(--accent) 28%, var(--bg-raised));
+        background: color-mix(in oklch, var(--accent) 22%, var(--bg-raised));
       }
 
       main {
@@ -246,15 +241,15 @@
         font-weight: 500;
         letter-spacing: 0.02em;
         margin-bottom: var(--space-5);
-        background: oklch(0.17 0.02 var(--hue) / 0.55);
+        background: var(--bg-raised);
       }
 
       .pulse-dot {
-        width: 7px;
-        height: 7px;
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
         background: var(--accent);
-        box-shadow: 0 0 0 5px var(--accent-soft);
+        opacity: 0.85;
         flex-shrink: 0;
       }
 
@@ -298,12 +293,8 @@
         border: 1px solid var(--line);
         border-radius: var(--radius-lg);
         padding: var(--space-5) var(--space-5) var(--space-4);
-        background: linear-gradient(
-          155deg,
-          oklch(0.2 0.022 var(--hue) / 0.55),
-          oklch(0.14 0.016 var(--hue) / 0.35)
-        );
-        box-shadow: var(--shadow);
+        background: var(--bg-raised);
+        box-shadow: var(--shadow-soft);
       }
 
       .card h3 {
@@ -325,7 +316,7 @@
         border-radius: var(--radius-lg);
         border: 1px solid var(--line);
         background: var(--bg-code);
-        box-shadow: var(--shadow);
+        box-shadow: var(--shadow-soft);
         text-align: start;
         overflow: hidden;
       }
@@ -342,7 +333,7 @@
         flex-wrap: wrap;
         padding: var(--space-3) var(--space-4);
         border-bottom: 1px solid var(--line);
-        background: oklch(0.14 0.016 var(--hue) / 0.9);
+        background: var(--bg-raised);
       }
 
       .code-panel__label {
@@ -444,8 +435,8 @@
 
       .reveal {
         opacity: 0;
-        transform: translateY(14px);
-        animation: rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        transform: translateY(8px);
+        animation: rise 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
       }
 
       .reveal:nth-child(2) {
@@ -465,6 +456,12 @@
       }
       .reveal:nth-child(7) {
         animation-delay: 0.32s;
+      }
+      .reveal:nth-child(8) {
+        animation-delay: 0.37s;
+      }
+      .reveal:nth-child(9) {
+        animation-delay: 0.42s;
       }
 
       @keyframes rise {
@@ -612,6 +609,38 @@
 
 <span class="tok-k">await</span> <span class="tok-f">runWithDbContext</span>({ requestId: <span class="tok-s">"req-abc"</span> }, <span class="tok-k">async</span> () => {
   <span class="tok-k">await</span> instrumentedSql<span class="tok-s">`select ${1}::int`</span>;
+});</code></pre>
+          </div>
+
+          <div class="code-panel reveal">
+            <div class="code-panel__head">
+              <span class="code-panel__label">Usage · wrapQueryFn</span>
+              <div class="code-panel__meta">
+                <span class="lang-tag">TypeScript</span>
+                <button type="button" class="copy-btn" data-copy-for="snippet-pre-wqf" aria-label="Copy wrapQueryFn code sample">
+                  Copy
+                </button>
+              </div>
+            </div>
+            <pre id="snippet-pre-wqf"><code><span class="tok-k">import</span> {
+  <span class="tok-t">createSlowQueryDetector</span>,
+  <span class="tok-t">wrapQueryFn</span>,
+  <span class="tok-t">createConsoleLogger</span>,
+  <span class="tok-t">runWithDbContext</span>,
+} <span class="tok-k">from</span> <span class="tok-s">"@olegkoval/queryd"</span>;
+
+<span class="tok-k">const</span> rawQuery = <span class="tok-k">async</span> (sql: <span class="tok-t">string</span>, params: <span class="tok-t">unknown</span>[]) => {
+  <span class="tok-c">/* your client */</span>
+  <span class="tok-k">return</span> [];
+};
+<span class="tok-k">const</span> detector = <span class="tok-f">createSlowQueryDetector</span>(
+  { warnThresholdMs: <span class="tok-t">200</span>, requestBudget: { maxQueries: <span class="tok-t">50</span> } },
+  { logger: <span class="tok-f">createConsoleLogger</span>() },
+);
+<span class="tok-k">const</span> q = <span class="tok-f">wrapQueryFn</span>(rawQuery, detector);
+
+<span class="tok-k">await</span> <span class="tok-f">runWithDbContext</span>({ requestId: <span class="tok-s">"job-7"</span> }, <span class="tok-k">async</span> () => {
+  <span class="tok-k">await</span> q(<span class="tok-s">"select 1"</span>, []);
 });</code></pre>
           </div>
         </div>
