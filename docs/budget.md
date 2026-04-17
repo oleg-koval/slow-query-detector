@@ -4,11 +4,11 @@ This document explains **what “budget” means** in reliability literature, **
 
 ## Terminology: three different “budgets”
 
-| Concept | Typical meaning | Relationship to queryd |
-| -------- | ---------------- | ------------------------ |
-| **SRE error budget** | Allowed rate of **SLO misses** (e.g. availability or latency objectives); used to balance reliability vs change velocity. | **Not the same thing.** queryd does not compute SLO compliance or error budgets. See [Service Level Objectives](https://sre.google/sre-book/service-level-objectives/) and [Embracing Risk](https://sre.google/sre-book/embracing-risk/) (motivation for error budgets). |
-| **End-user / latency budget** | Share of total request time allocated to each hop (browser, CDN, app, DB) so the **overall** request stays within a target. | queryd’s `maxTotalDurationMs` is an **aggregate DB time per `requestId`**, not a full end-to-end latency budget—but it aligns with the idea of capping how much wall-clock time DB work can consume inside one logical request. Monitoring guidance often groups **latency** with other “golden signals” ([Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/)). |
-| **Per-request DB budget (this library)** | Optional caps on **how many SQL round-trips** and/or **total measured DB duration** apply to one **`requestId`** before emitting a **`db.request.budget`** event. | This is what `requestBudget` implements. It is **observability and alerting**, not a hard stop: queries still run unless **you** add policy on top of events. |
+| Concept                                  | Typical meaning                                                                                                                                                   | Relationship to queryd                                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SRE error budget**                     | Allowed rate of **SLO misses** (e.g. availability or latency objectives); used to balance reliability vs change velocity.                                         | **Not the same thing.** queryd does not compute SLO compliance or error budgets. See [Service Level Objectives](https://sre.google/sre-book/service-level-objectives/) and [Embracing Risk](https://sre.google/sre-book/embracing-risk/) (motivation for error budgets).                                                                                                                                  |
+| **End-user / latency budget**            | Share of total request time allocated to each hop (browser, CDN, app, DB) so the **overall** request stays within a target.                                       | queryd’s `maxTotalDurationMs` is an **aggregate DB time per `requestId`**, not a full end-to-end latency budget—but it aligns with the idea of capping how much wall-clock time DB work can consume inside one logical request. Monitoring guidance often groups **latency** with other “golden signals” ([Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/)). |
+| **Per-request DB budget (this library)** | Optional caps on **how many SQL round-trips** and/or **total measured DB duration** apply to one **`requestId`** before emitting a **`db.request.budget`** event. | This is what `requestBudget` implements. It is **observability and alerting**, not a hard stop: queries still run unless **you** add policy on top of events.                                                                                                                                                                                                                                             |
 
 ## How queryd request budgets work
 
@@ -44,12 +44,12 @@ This design targets **query storms**: many fast queries that never cross a singl
 
 ## How this feature helps users
 
-| User goal | How queryd helps |
-| ---------- | ----------------- |
-| Find **N+1** or accidental fan-out | Many queries stay under per-query ms thresholds but **trip `maxQueries`** or **`maxTotalDurationMs`**, producing a structured **`db.request.budget`** event with counts and totals. |
-| **Alert** without parsing every query log | One **warn-level** (or custom sink) event per offending `requestId` reduces noise versus logging every query. |
-| **Correlate** to traffic | Events include **`requestId`** and optional **`userId`** (from context) for support and debugging. |
-| **Integrate** with existing observability | Custom **`IEventSink`** implementations can route `event === "db.request.budget"` to metrics, tickets, or paging ([README](../README.md#request-budgets-per-requestid)). |
+| User goal                                 | How queryd helps                                                                                                                                                                    |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Find **N+1** or accidental fan-out        | Many queries stay under per-query ms thresholds but **trip `maxQueries`** or **`maxTotalDurationMs`**, producing a structured **`db.request.budget`** event with counts and totals. |
+| **Alert** without parsing every query log | One **warn-level** (or custom sink) event per offending `requestId` reduces noise versus logging every query.                                                                       |
+| **Correlate** to traffic                  | Events include **`requestId`** and optional **`userId`** (from context) for support and debugging.                                                                                  |
+| **Integrate** with existing observability | Custom **`IEventSink`** implementations can route `event === "db.request.budget"` to metrics, tickets, or paging ([README](../README.md#request-budgets-per-requestid)).            |
 
 **Non-goals:** queryd does not **reject** or **cancel** queries when a budget is exceeded; it **observes** and **emits**. Hard enforcement requires application or database-layer controls in addition to this library.
 
@@ -64,4 +64,4 @@ This design targets **query storms**: many fast queries that never cross a singl
 
 ---
 
-*Package: [@olegkoval/queryd](https://www.npmjs.com/package/@olegkoval/queryd) · Repo README: [Request budgets](../README.md#request-budgets-per-requestid).*
+_Package: [@olegkoval/queryd](https://www.npmjs.com/package/@olegkoval/queryd) · Repo README: [Request budgets](../README.md#request-budgets-per-requestid)._
