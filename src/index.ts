@@ -4,6 +4,7 @@
  */
 
 import type { SlowQueryDetectorConfig, ILogger, IContextProvider, IEventSink } from "./types";
+import { getDbContext } from "./context";
 import { SlowQueryDetector } from "./detector";
 import { LoggerSink } from "./sinks/loggerSink";
 import { wrapQueryFn } from "./wrappers/wrapQueryFn";
@@ -32,7 +33,11 @@ export function createSlowQueryDetector(
     );
   }
 
-  return new SlowQueryDetector(config, deps.contextProvider, sinks);
+  const contextProvider = deps.contextProvider ?? {
+    getContext: () => getDbContext(),
+  };
+
+  return new SlowQueryDetector(config, contextProvider, sinks);
 }
 
 export { wrapQueryFn, wrapTaggedTemplate };
@@ -46,6 +51,9 @@ export type {
   SlowQueryDetectorConfig,
   QueryEvent,
   QuerySubtype,
+  RequestBudgetConfig,
+  RequestBudgetViolationEvent,
+  DetectorEvent,
 } from "./types";
 
 export { getDbContext, runWithDbContext, type DbContext } from "./context";

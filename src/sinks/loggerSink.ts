@@ -2,7 +2,7 @@
  * Logger-based event sink implementation
  */
 
-import type { IEventSink, ILogger, QueryEvent } from "../types";
+import type { DetectorEvent, IEventSink, ILogger } from "../types";
 import { DEFAULT_CONFIG } from "../config";
 
 /**
@@ -17,7 +17,12 @@ export class LoggerSink implements IEventSink {
     },
   ) {}
 
-  handle(event: QueryEvent): void {
+  handle(event: DetectorEvent): void {
+    if (event.event === "db.request.budget") {
+      this.logger.warn(event);
+      return;
+    }
+
     const sampleRateNormal = this.config.sampleRateNormal ?? DEFAULT_CONFIG.sampleRateNormal;
 
     switch (event.subtype) {

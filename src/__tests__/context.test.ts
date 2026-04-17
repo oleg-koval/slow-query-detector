@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getDbContext, runWithDbContext } from "../context";
+import { getDbContext, resolveDetectorContext, runWithDbContext } from "../context";
 
 describe("slowQueryDetector context", () => {
   it("provides context within run scope", async () => {
@@ -11,5 +11,18 @@ describe("slowQueryDetector context", () => {
 
   it("returns empty context outside scope", () => {
     expect(getDbContext()).toEqual({});
+  });
+
+  it("resolveDetectorContext returns empty when provider missing", () => {
+    expect(resolveDetectorContext(undefined)).toEqual({});
+  });
+
+  it("resolveDetectorContext swallows provider errors", () => {
+    const provider = {
+      getContext: (): never => {
+        throw new Error("boom");
+      },
+    };
+    expect(resolveDetectorContext(provider)).toEqual({});
   });
 });

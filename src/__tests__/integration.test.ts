@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createSlowQueryDetector } from "../index";
+import { createSlowQueryDetector, runWithDbContext, wrapTaggedTemplate } from "../index";
 import { wrapPrismaClient } from "../prisma";
 import type { ILogger, IContextProvider } from "../types";
 import type { PrismaClient } from "@prisma/client";
@@ -164,5 +164,32 @@ describe("integration", () => {
     });
 
     expect(txQueryRaw).toHaveBeenCalledTimes(2);
+  });
+
+  it("should emit request budget via wrapTaggedTemplate and runWithDbContext", async () => {
+    const detector = createSlowQueryDetector(
+      {
+        warnThresholdMs: 999_999,
+        requestBudget: { maxQueries: 2 },
+        sampleRateNormal: 0,
+      },
+      { logger: mockLogger },
+    );
+    const exec = vi.fn().mockResolvedValue([]);
+    const wrapped = wrapTaggedTemplate(exec, detector);
+
+    await runWithDbContext({ requestId: "req-budget", userId: "u-1" }, async () => {
+      await wrapped`SELECT 1`;
+      await wrapped`SELECT 2`;
+      await wrapped`SELECT 3`;
+    });
+
+    const budgetWarnings = mockWarn.mock.calls.filter(
+      (c) =>
+        typeof c[0] === "object" &&
+        c[0] !== null &&
+        (c[0] as { event?: string }).event === "db.request.budget",
+    );
+    expect(budgetWarnings).toHaveLength(1);
   });
 });

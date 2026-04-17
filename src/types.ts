@@ -5,6 +5,16 @@
 export type QuerySubtype = "normal" | "slow" | "very_slow" | "error";
 
 /**
+ * Per-request aggregate limits (requires requestId on context).
+ */
+export interface RequestBudgetConfig {
+  maxQueries?: number;
+  maxTotalDurationMs?: number;
+  /** Max distinct requestIds held in memory; LRU eviction. Default 5000. */
+  maxTrackedRequests?: number;
+}
+
+/**
  * Logger interface for dependency injection
  */
 export interface ILogger {
@@ -38,13 +48,6 @@ export interface IExplainRunner {
 }
 
 /**
- * Event sink interface for extensibility
- */
-export interface IEventSink {
-  handle(event: QueryEvent): void;
-}
-
-/**
  * Slow query detector configuration
  */
 export interface SlowQueryDetectorConfig {
@@ -58,6 +61,7 @@ export interface SlowQueryDetectorConfig {
   explainThresholdMs?: number; // default: 5000
   dbName?: string;
   paramsRedactor?: (params: unknown[]) => unknown[];
+  requestBudget?: RequestBudgetConfig;
 }
 
 /**
@@ -90,4 +94,29 @@ export interface QueryMetadata {
   rowCount?: number;
   queryName?: string;
   error?: Error;
+}
+
+/**
+ * Emitted once per requestId when aggregate limits are exceeded.
+ */
+export interface RequestBudgetViolationEvent {
+  event: "db.request.budget";
+  subtype: "violation";
+  timestamp: string;
+  requestId: string;
+  userId?: string;
+  queryCount: number;
+  totalDurationMs: number;
+  maxQueries?: number;
+  maxTotalDurationMs?: number;
+  dbName?: string;
+}
+
+export type DetectorEvent = QueryEvent | RequestBudgetViolationEvent;
+
+/**
+ * Event sink interface for extensibility
+ */
+export interface IEventSink {
+  handle(event: DetectorEvent): void;
 }
