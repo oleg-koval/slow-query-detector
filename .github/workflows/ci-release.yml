@@ -59,8 +59,45 @@ jobs:
           path-to-lcov: coverage/lcov.info
       - run: npm run build
 
+  benchmark-e2e-dataset:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: queryd_bench
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d queryd_bench"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/queryd_bench
+      BENCH_DATASET_ROWS: 80000
+      BENCH_ITERATIONS: 600
+      BENCH_WARMUP: 60
+      BENCH_SERIES_RUNS: 3
+      BENCH_OUTPUT_FILE: bench/latest-e2e-dataset.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Run dataset benchmark + regression compare
+        run: |
+          mkdir -p bench
+          npm run benchmark:e2e:dataset
+          npm run bench:compare:e2e:dataset
+
   release-readiness:
-    needs: [lint, format, test]
+    needs: [lint, format, test, benchmark-e2e-dataset]
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
