@@ -141,9 +141,7 @@ describe("RequestBudgetTracker", () => {
   it("accepts very long requestId strings without throwing", () => {
     const t = new RequestBudgetTracker(100);
     const id = "z".repeat(20_000);
-    expect(() =>
-      t.record(id, undefined, 1, { maxQueries: 1 }, undefined),
-    ).not.toThrow();
+    expect(() => t.record(id, undefined, 1, { maxQueries: 1 }, undefined)).not.toThrow();
   });
 
   it("clamps non-positive maxTrackedRequests to a single LRU slot", () => {

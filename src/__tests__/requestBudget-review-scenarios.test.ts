@@ -41,10 +41,13 @@ describe("request budget review scenarios", () => {
       queueMicrotask(() => resolve());
     });
 
-    const first = detector.executeQuery(async () => {
-      await barrier;
-      return [];
-    }, { sql: "awaits-microtask", params: [] });
+    const first = detector.executeQuery(
+      async () => {
+        await barrier;
+        return [];
+      },
+      { sql: "awaits-microtask", params: [] },
+    );
 
     const second = detector.executeQuery(async () => [], { sql: "sync-empty", params: [] });
 
@@ -68,7 +71,12 @@ describe("request budget review scenarios", () => {
 
     const violation = sinkHandle.mock.calls
       .map((c) => c[0])
-      .find((e) => typeof e === "object" && e !== null && (e as { event?: string }).event === "db.request.budget");
+      .find(
+        (e) =>
+          typeof e === "object" &&
+          e !== null &&
+          (e as { event?: string }).event === "db.request.budget",
+      );
     expect(violation).toMatchObject({ requestId: " " });
   });
 });

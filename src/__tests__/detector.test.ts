@@ -154,15 +154,21 @@ describe("detector", () => {
     );
 
     await expect(
-      detector.executeQuery(async () => {
-        throw new Error("fail-one");
-      }, { sql: "SELECT 1", params: [] }),
+      detector.executeQuery(
+        async () => {
+          throw new Error("fail-one");
+        },
+        { sql: "SELECT 1", params: [] },
+      ),
     ).rejects.toThrow("fail-one");
 
     await expect(
-      detector.executeQuery(async () => {
-        throw new Error("fail-two");
-      }, { sql: "SELECT 2", params: [] }),
+      detector.executeQuery(
+        async () => {
+          throw new Error("fail-two");
+        },
+        { sql: "SELECT 2", params: [] },
+      ),
     ).rejects.toThrow("fail-two");
 
     const budgets = sinkHandle.mock.calls
@@ -230,10 +236,13 @@ describe("detector", () => {
       await detector.executeQuery(async () => [], { sql: `SELECT ${i}`, params: [] });
     }
 
-    await detector.executeQuery(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 30));
-      return [];
-    }, { sql: "SELECT slow", params: [] });
+    await detector.executeQuery(
+      async () => {
+        await new Promise((resolve) => setTimeout(resolve, 30));
+        return [];
+      },
+      { sql: "SELECT slow", params: [] },
+    );
 
     const budgetEvents = sinkHandle.mock.calls.filter(
       (c) =>

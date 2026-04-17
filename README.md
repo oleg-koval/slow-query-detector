@@ -63,7 +63,12 @@ await runWithDbContext({ requestId: "req-abc", userId: "user-42" }, async () => 
 ### `wrapQueryFn` (string SQL)
 
 ```ts
-import { createSlowQueryDetector, wrapQueryFn, createConsoleLogger, runWithDbContext } from "@olegkoval/queryd";
+import {
+  createSlowQueryDetector,
+  wrapQueryFn,
+  createConsoleLogger,
+  runWithDbContext,
+} from "@olegkoval/queryd";
 
 const rawQuery = async (sql: string, params: unknown[]) => {
   /* your client */

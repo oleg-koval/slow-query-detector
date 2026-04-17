@@ -18,7 +18,11 @@ describe("slowQueryDetector context", () => {
   });
 
   it("resolveDetectorContext swallows provider errors", () => {
-    const provider = { getContext: (): never => { throw new Error("boom"); } };
+    const provider = {
+      getContext: (): never => {
+        throw new Error("boom");
+      },
+    };
     expect(resolveDetectorContext(provider)).toEqual({});
   });
 });
