@@ -75,8 +75,9 @@ describe("wrapPrisma", () => {
 
     const wrapped = wrapPrisma(mockPrisma as unknown as PrismaClient, detector);
 
-    await wrapped.$transaction(async (tx: typeof txClient) => {
-      await tx.$queryRaw`SELECT * FROM users`;
+    await wrapped.$transaction(async (tx) => {
+      const instrumentedTx = tx as unknown as typeof txClient;
+      await instrumentedTx.$queryRaw`SELECT * FROM users`;
     });
 
     expect(originalTransaction).toHaveBeenCalled();

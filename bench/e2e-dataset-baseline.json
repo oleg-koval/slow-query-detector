@@ -1,0 +1,17 @@
+{
+  "_comment": "Set enforced to true after you calibrate ceilings from a stable runner (see docs/benchmark-regression.md). Null ceilings skip that slug.",
+  "schemaVersion": 1,
+  "enforced": false,
+  "toleranceRatio": 0.12,
+  "workload": {
+    "BENCH_DATASET_ROWS": 80000,
+    "BENCH_ITERATIONS": 600,
+    "BENCH_WARMUP": 60,
+    "BENCH_SERIES_RUNS": 3
+  },
+  "ceilingMedianPerOpUs": {
+    "bare": null,
+    "wrapNoBudget": null,
+    "wrapBudget": null
+  }
+}

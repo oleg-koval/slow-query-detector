@@ -3,3 +3,12 @@ dist
 coverage
 *.log
 .addons
+bench/latest-e2e-dataset.json
+
+# README GIF output + temp frames (script lives in repo: scripts/generate-readme-demo-gif.sh)
+.tmp-readme-gif-frames
+docs/assets/queryd-readme-demo.gif
+
+# Local-only marketing / launch drafts (keep in your clone; not shipped with the repo)
+docs/marketing-launch-kit.md
+docs/social-post-sequence.md
