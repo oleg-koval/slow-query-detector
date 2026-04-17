@@ -14,6 +14,10 @@ permissions:
   checks: write
   id-token: write
 
+# Skip Husky hook installation in CI (hooks are for local commits only).
+env:
+  HUSKY: 0
+
 jobs:
   # Separate jobs so each name appears as a GitHub status check (branch protection).
   lint:
