@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: queryd_bench
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d queryd_bench"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+
+  benchmark:
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      NODE_ENV: development
+      BENCH_ITERATIONS: ${BENCH_ITERATIONS:-100000}
+      BENCH_WARMUP: ${BENCH_WARMUP:-5000}
+    command: >
+      bash -lc "npm ci --include=dev --ignore-scripts && npm run benchmark"
+
+  benchmark-e2e:
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ./:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/queryd_bench
+      BENCH_ITERATIONS: ${BENCH_ITERATIONS:-5000}
+      BENCH_WARMUP: ${BENCH_WARMUP:-500}
+    command: >
+      bash -lc "npm ci --include=dev --ignore-scripts && npm run benchmark:e2e"
+
+  benchmark-e2e-dataset:
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ./:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/queryd_bench
+      BENCH_DATASET_ROWS: ${BENCH_DATASET_ROWS:-100000}
+      BENCH_ITERATIONS: ${BENCH_ITERATIONS:-2000}
+      BENCH_WARMUP: ${BENCH_WARMUP:-200}
+      BENCH_SERIES_RUNS: ${BENCH_SERIES_RUNS:-1}
+    command: >
+      bash -lc "npm ci --include=dev --ignore-scripts && npm run benchmark:e2e:dataset"

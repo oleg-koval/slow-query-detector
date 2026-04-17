@@ -158,9 +158,10 @@ describe("integration", () => {
 
     const wrapped = wrapPrismaClient(mockPrisma as unknown as PrismaClient, detector);
 
-    await wrapped.$transaction(async (tx: typeof txClient) => {
-      await tx.$queryRaw`SELECT * FROM users`;
-      await tx.$queryRaw`SELECT * FROM posts`;
+    await wrapped.$transaction(async (tx) => {
+      const instrumentedTx = tx as unknown as typeof txClient;
+      await instrumentedTx.$queryRaw`SELECT * FROM users`;
+      await instrumentedTx.$queryRaw`SELECT * FROM posts`;
     });
 
     expect(txQueryRaw).toHaveBeenCalledTimes(2);
