@@ -87,6 +87,8 @@ await runWithDbContext({ requestId: "job-7" }, async () => {
 
 ## Request budgets (per `requestId`)
 
+Background, practices, and sources: **[docs/budget.md](./docs/budget.md)**.
+
 Set `requestBudget.maxQueries` and/or `requestBudget.maxTotalDurationMs` to catch **query storms** (many fast queries) that stay under single-query latency thresholds. Counts and duration are summed **per `requestId`** for the lifetime of that id in the LRU map (in-process only).
 
 - **Successful and failed** `executeQuery` completions both increment the budget (every round-trip attempt counts).
