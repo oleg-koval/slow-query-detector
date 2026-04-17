@@ -219,22 +219,24 @@ describe("detector", () => {
     expect(budgets).toHaveLength(0);
   });
 
-  it("emits only one budget violation when a second configured limit would also be exceeded later", async () => {
+  it("emits only one budget violation when maxQueries trips first; later work exceeds maxTotalDurationMs without a second emission", async () => {
     const contextProvider = {
       getContext: () => ({ requestId: "dual-limit" }),
     };
     const detector = new SlowQueryDetector(
       {
         warnThresholdMs: 999_999,
-        requestBudget: { maxQueries: 2, maxTotalDurationMs: 1_000_000 },
+        // Third query exceeds maxQueries; fourth adds enough duration that cumulative total > maxTotalDurationMs,
+        // but violationEmitted already suppresses a second db.request.budget event.
+        requestBudget: { maxQueries: 2, maxTotalDurationMs: 20 },
       },
       contextProvider,
       [mockSink],
     );
 
-    for (let i = 0; i < 3; i++) {
-      await detector.executeQuery(async () => [], { sql: `SELECT ${i}`, params: [] });
-    }
+    await detector.executeQuery(async () => [], { sql: "SELECT 0", params: [] });
+    await detector.executeQuery(async () => [], { sql: "SELECT 1", params: [] });
+    await detector.executeQuery(async () => [], { sql: "SELECT 2", params: [] });
 
     await detector.executeQuery(
       async () => {
