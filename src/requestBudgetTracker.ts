@@ -12,6 +12,24 @@ type Entry = {
 
 const DEFAULT_MAX_TRACKED = 5000;
 
+/**
+ * Resolves the query-count cap used for comparisons and emitted events.
+ * Negative or non-finite values are treated as "no cap" (same as omitting the field).
+ * Zero is preserved: it means no queries are allowed before violation.
+ */
+export function effectiveMaxQueries(maxQueries: number | undefined): number | undefined {
+  if (maxQueries === undefined) {
+    return undefined;
+  }
+  if (maxQueries === 0) {
+    return 0;
+  }
+  if (!Number.isFinite(maxQueries) || maxQueries < 0) {
+    return undefined;
+  }
+  return maxQueries;
+}
+
 export class RequestBudgetTracker {
   private readonly map = new Map<string, Entry>();
   private readonly maxTracked: number;
@@ -55,7 +73,8 @@ export class RequestBudgetTracker {
       return undefined;
     }
 
-    const overQueries = budget.maxQueries !== undefined && next.queryCount > budget.maxQueries;
+    const cap = effectiveMaxQueries(budget.maxQueries);
+    const overQueries = cap !== undefined && next.queryCount > cap;
     const overTotal =
       budget.maxTotalDurationMs !== undefined && next.totalDurationMs > budget.maxTotalDurationMs;
 
@@ -74,7 +93,7 @@ export class RequestBudgetTracker {
       userId,
       queryCount: next.queryCount,
       totalDurationMs: next.totalDurationMs,
-      maxQueries: budget.maxQueries,
+      maxQueries: cap,
       maxTotalDurationMs: budget.maxTotalDurationMs,
       dbName,
     };

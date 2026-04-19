@@ -14,7 +14,7 @@ This document explains **what “budget” means** in reliability literature, **
 
 Configure `requestBudget` on `SlowQueryDetectorConfig`:
 
-- **`maxQueries`** — maximum number of completed `executeQuery` calls (success or error) per `requestId`.
+- **`maxQueries`** — maximum number of completed `executeQuery` calls (success or error) per `requestId`. Omit the field (or only set `maxTotalDurationMs`) for no cap on count. **`0`** means the first query exceeds the budget. **Negative or non-finite** values are treated as **no cap** (same as omitting the field).
 - **`maxTotalDurationMs`** — maximum **sum** of per-query durations for that `requestId`.
 - **`maxTrackedRequests`** — LRU size for in-memory state (default 5000).
 

@@ -245,7 +245,7 @@ await runWithDbContext({ requestId: "job-7" }, async () => {
 
 Background, practices, and sources: **[docs/budget.md](./docs/budget.md)**.
 
-Set `requestBudget.maxQueries` and/or `requestBudget.maxTotalDurationMs` to catch **query storms** (many fast queries) that stay under single-query latency thresholds. Counts and duration are summed **per `requestId`** for the lifetime of that id in the LRU map (in-process only).
+Set `requestBudget.maxQueries` and/or `requestBudget.maxTotalDurationMs` to catch **query storms** (many fast queries) that stay under single-query latency thresholds. Counts and duration are summed **per `requestId`** for the lifetime of that id in the LRU map (in-process only). Negative or non-finite `maxQueries` values are ignored (no cap on query count); use `0` to mean “no queries allowed” before the first violation.
 
 - **Successful and failed** `executeQuery` completions both increment the budget (every round-trip attempt counts).
 - The first time a limit is exceeded for a `requestId`, sinks receive one **`db.request.budget`** event (`LoggerSink` → **warn**). A second violation for the same id is only possible after that id falls out of the LRU (e.g. many concurrent requests with unique ids).
