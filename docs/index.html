@@ -647,6 +647,10 @@
       </section>
 
       <p class="footnote wrap">
+        Request budgets: LRU eviction resets per-<code>requestId</code> counters (same id string can violate again after re-insertion).
+        <code>createSlowQueryDetector</code> may <code>push</code> onto your <code>sinks</code> array — see README.
+      </p>
+      <p class="footnote wrap">
         MIT licensed ·
         <a href="https://github.com/oleg-koval/slow-query-detector">oleg-koval/slow-query-detector</a>
         · package name on npm is <strong>@olegkoval/queryd</strong>

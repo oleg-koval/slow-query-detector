@@ -186,6 +186,8 @@ Why not benchmark only against DB in Docker?
 - **`wrapTaggedTemplate`** — tagged template `(strings, ...values) => Promise<unknown>` (e.g. **postgres.js** `sql`, same literal shape as Prisma `$queryRaw`).
 - **`extractQueryInfo`** — build `$1…$n` SQL + params from a `TemplateStringsArray` if you wire a custom executor.
 
+**`createSlowQueryDetector`** appends a default **`LoggerSink`** with **`Array#push`** when your `sinks` array does not already include one, so the array you pass is **mutated**. Pass an array you own, or copy first (`sinks: [...existing]`), if immutability matters.
+
 ### postgres.js (tagged template + request scope)
 
 Use **`runWithDbContext`** so each HTTP request (or job) gets a stable **`requestId`**; **`createSlowQueryDetector`** defaults `contextProvider` to **`getDbContext()`**, so you usually do **not** pass `contextProvider` unless you merge ALS with your own source.
@@ -249,6 +251,7 @@ Set `requestBudget.maxQueries` and/or `requestBudget.maxTotalDurationMs` to catc
 
 - **Successful and failed** `executeQuery` completions both increment the budget (every round-trip attempt counts).
 - The first time a limit is exceeded for a `requestId`, sinks receive one **`db.request.budget`** event (`LoggerSink` → **warn**). A second violation for the same id is only possible after that id falls out of the LRU (e.g. many concurrent requests with unique ids).
+- **LRU eviction resets counters:** when a `requestId` is evicted, its budget state is dropped. If that same id string appears again later, totals start from zero and another **`db.request.budget`** can fire for a new burst.
 - **`requestBudget.maxTrackedRequests`** bounds memory (default **5000**); non-finite or `< 1` values are normalized.
 
 **Custom sinks:** `IEventSink.handle` receives **`DetectorEvent`** (`QueryEvent | RequestBudgetViolationEvent`). Branch on `event.event === "db.request.budget"` before assuming `sql` / `subtype` exist.

@@ -22,7 +22,7 @@ Behavior (see [README § Request budgets](../README.md#request-budgets-per-reque
 
 1. Budgets apply only when **`requestId`** is set on context (e.g. via `runWithDbContext`). With **`createSlowQueryDetector`**, the default `contextProvider` reads that context; custom detectors must supply one (see [README](../README.md#request-budgets-per-requestid)).
 2. Each query completion increments **count** and adds **duration** to that `requestId`.
-3. The **first** time either limit is exceeded, sinks receive **one** `RequestBudgetViolationEvent` (`event: "db.request.budget"`). Further violations for the same id only happen after that id is evicted from the LRU map.
+3. The **first** time either limit is exceeded, sinks receive **one** `RequestBudgetViolationEvent` (`event: "db.request.budget"`). Further violations for the same id only happen after that id is evicted from the LRU map. **Eviction removes the entry:** the same `requestId` string seen again later gets **fresh counters**, so another `db.request.budget` is possible after a subsequent burst.
 4. **`LoggerSink`** logs budget events at **warn** level (see `LoggerSink` in source).
 
 This design targets **query storms**: many fast queries that never cross a single-query `warnThresholdMs`, but still hurt latency, CPU, and pool usage.
