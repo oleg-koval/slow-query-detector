@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { RequestBudgetTracker } from "../requestBudgetTracker";
+import { RequestBudgetTracker, effectiveMaxQueries } from "../requestBudgetTracker";
 
 describe("RequestBudgetTracker", () => {
   it("emits violation when query count exceeds maxQueries", () => {
@@ -104,6 +104,36 @@ describe("RequestBudgetTracker", () => {
     for (let i = 0; i < 5; i++) {
       expect(t.record("nan-q", undefined, 1, budget, undefined)).toBeUndefined();
     }
+  });
+
+  it("treats negative maxQueries as no query-count cap", () => {
+    const t = new RequestBudgetTracker(50);
+    const budget = { maxQueries: -1 };
+    for (let i = 0; i < 20; i++) {
+      expect(t.record("neg-cap", undefined, 1, budget, undefined)).toBeUndefined();
+    }
+  });
+
+  it("still applies maxTotalDurationMs when maxQueries is negative", () => {
+    const t = new RequestBudgetTracker(50);
+    const budget = { maxQueries: -1, maxTotalDurationMs: 5 };
+    expect(t.record("neg-plus-dur", undefined, 3, budget, undefined)).toBeUndefined();
+    expect(t.record("neg-plus-dur", undefined, 3, budget, undefined)).toMatchObject({
+      event: "db.request.budget",
+      totalDurationMs: 6,
+      maxQueries: undefined,
+      maxTotalDurationMs: 5,
+    });
+  });
+
+  it("effectiveMaxQueries matches runtime policy", () => {
+    expect(effectiveMaxQueries(undefined)).toBeUndefined();
+    expect(effectiveMaxQueries(0)).toBe(0);
+    expect(effectiveMaxQueries(3)).toBe(3);
+    expect(effectiveMaxQueries(-1)).toBeUndefined();
+    expect(effectiveMaxQueries(Number.NaN)).toBeUndefined();
+    expect(effectiveMaxQueries(Number.POSITIVE_INFINITY)).toBeUndefined();
+    expect(effectiveMaxQueries(Number.NEGATIVE_INFINITY)).toBeUndefined();
   });
 
   it("treats negative maxTotalDurationMs as an immediately exceeded time cap", () => {

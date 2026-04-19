@@ -8,6 +8,7 @@ export type QuerySubtype = "normal" | "slow" | "very_slow" | "error";
  * Per-request aggregate limits (requires requestId on context).
  */
 export interface RequestBudgetConfig {
+  /** Max completed queries per `requestId`. Omit or use only `maxTotalDurationMs` for no query cap. `0` means the first query trips the budget. Negative or non-finite values are ignored (no cap). */
   maxQueries?: number;
   maxTotalDurationMs?: number;
   /** Max distinct requestIds held in memory; LRU eviction. Default 5000. */
