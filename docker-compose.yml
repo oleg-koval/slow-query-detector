@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:16
+    image: postgres:18
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -12,7 +12,7 @@ services:
       retries: 20
 
   benchmark:
-    image: node:22
+    image: node:26
     working_dir: /app
     volumes:
       - ./:/app
@@ -24,7 +24,7 @@ services:
       bash -lc "npm ci --include=dev --ignore-scripts && npm run benchmark"
 
   benchmark-e2e:
-    image: node:22
+    image: node:26
     working_dir: /app
     volumes:
       - ./:/app
@@ -40,7 +40,7 @@ services:
       bash -lc "npm ci --include=dev --ignore-scripts && npm run benchmark:e2e"
 
   benchmark-e2e-dataset:
-    image: node:22
+    image: node:26
     working_dir: /app
     volumes:
       - ./:/app
